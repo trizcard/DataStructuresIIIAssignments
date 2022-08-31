@@ -37,6 +37,8 @@ void comando13(char* nome_do_arquivo_entrada, int n) {
 
 }
 */
+
+
 void comando14(char* nome_do_arquivo_entrada, int n) {
     FILE* arquivo_entrada = abrir_leitura_binario(nome_do_arquivo_entrada);
     if(arquivo_entrada == NULL) return;
@@ -68,4 +70,5 @@ void comando14(char* nome_do_arquivo_entrada, int n) {
           printf("Comprimento do caminho entre %d e %d parando em %d: %dMbps\n", orig, fim, parada, cMin);
         }
     }
+    //lembrar de fechar arq e liberar o reg cabecalho
 }
