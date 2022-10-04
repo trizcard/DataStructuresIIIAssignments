@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "funcFornecidas.h"
+#include "funcAuxiliares.h"s
 #include "cabecalho.h"
 #define LIXO '$'
 
