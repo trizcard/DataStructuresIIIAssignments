@@ -2,31 +2,33 @@
 
 int main() {
     int func;
-    scanf("%d", &func);
+    char nomeArq[25];
+    scanf("%d ", &func);
+    fscanf(stdin, "%s", nomeArq);
 
     switch (func) {
     case 1:
-        funcUM();
+        funcUM(nomeArq);
         break;
     
     case 2:
-        funcDOIS();
+        funcDOIS(nomeArq);
         break;
     
     case 3:
-        funcTRES();
+        funcTRES(nomeArq);
         break;
     
     case 4:
-        funcQUATRO();
+        funcQUATRO(nomeArq);
         break;
 
     case 5:
-        funcCINCO();
+        funcCINCO(nomeArq);
         break;
     
     case 6:
-        funcSEIS();
+        funcSEIS(nomeArq);
         break;
     }
 }

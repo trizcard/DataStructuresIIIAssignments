@@ -6,9 +6,9 @@
 #include "cabecalho.h"
 #define LIXO '$'
 
-void funcUM();
-void funcDOIS();
-void funcTRES();
-void funcQUATRO();
-void funcCINCO();
-void funcSEIS();
+void funcUM(char nomeArq[25]);
+void funcDOIS(char nomeArq[25]);
+void funcTRES(char nomeArq[25]);
+void funcQUATRO(char nomeArq[25]);
+void funcCINCO(char nomeArq[25]);
+void funcSEIS(char nomeArq[25]);
