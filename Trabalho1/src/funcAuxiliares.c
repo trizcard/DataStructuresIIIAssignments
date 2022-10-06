@@ -13,7 +13,7 @@ int lerCampoVar(char* string, char *strPoPs, char *strPais){
     do{
         c = string[i];
         strPoPs[i] = c;
-        realloc(strPoPs, (i+1)*sizeof(char));
+        strPoPs = realloc(strPoPs, (i+1)*sizeof(char));
         i++;
     } while(c != '|');
     int j = i;
@@ -21,7 +21,7 @@ int lerCampoVar(char* string, char *strPoPs, char *strPais){
     while(c != '|' || c != '\0'){
         c = string[i];
         strPais[i] = c;
-        realloc(strPais, (j-(i+1))*sizeof(char));
+        strPais = realloc(strPais, (j-(i+1))*sizeof(char));
         i++;
     }
 
@@ -70,9 +70,9 @@ int lerRegistro(FILE *arq, pagDisco *pag){
         pag->fim = reg;
         pag->tamanho = 1;
     }else{
-        pagDisco *pagAnt;
-        pagAnt = pag->fim;
-        pagAnt->prox = reg;
+        registro *regAnt;
+        regAnt = pag->fim;
+        regAnt->prox = reg;
         pag->fim = reg;
         pag->tamanho++;
     }
@@ -89,8 +89,10 @@ void lerPagDisco(FILE *arq, pagDisco *pag, cabecalho *cab){
         lerRegistro(arq, pag);
         cab->proxRRN++;
         if(pag->tamanho == 15){
-            pag->prox = (pagDisco*) malloc(sizeof(pagDisco));
-            pag = pag->prox;
+            pagDisco *pagAnt;
+            pagAnt = pag;
+            pagAnt->prox = (pagDisco*) malloc(sizeof(pagDisco));
+            pagAnt->prox = pag;
             pag->inicio = NULL;
             pag->fim = NULL;
             pag->tamanho = 0;
@@ -121,8 +123,6 @@ void lerArq(char nome[25], cabecalho *cab){
     pagDisco pag[1];
 
     cab->prox = pag;
-    pag->inicio = cab;
-    pag->fim = cab;
     pag->tamanho = 1;
     pag->prox = NULL;
 

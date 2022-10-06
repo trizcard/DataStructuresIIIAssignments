@@ -3,7 +3,7 @@
 #include <string.h>
 #define LIXO '$'
 
-typedef struct {
+struct cabecalho{
     char status[1];
     int topo;
     int proxRRN;
@@ -13,9 +13,11 @@ typedef struct {
     char lixo[939];
 
     struct pagDisco *prox;
-}cabecalho;
+};
+typedef struct cabecalho cabecalho;
 
-typedef struct {
+
+struct registro{
     char removido[1];
     int encadeamento;
     int idConecta;
@@ -28,12 +30,14 @@ typedef struct {
     char *nomePais;
 
     struct registro *prox;
-}registro;
+};
+typedef struct registro registro;
 
-typedef struct {
+struct pagDisco{
     struct registro *inicio;
     struct registro *fim;
     
     int tamanho;
     struct pagDisco *prox;
-}pagDisco;
+};
+typedef struct pagDisco pagDisco;

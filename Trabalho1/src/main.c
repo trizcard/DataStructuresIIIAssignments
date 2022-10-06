@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "funcionalidades.h"
 
 int main() {
     int func;
