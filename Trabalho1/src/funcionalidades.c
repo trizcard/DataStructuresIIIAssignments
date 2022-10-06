@@ -1,13 +1,18 @@
 #include "funcionalidades.h"
 
-void funcUM(char nomeArq[25]){}
+void funcUM(char nomeArq[25]){
+}
 
 void funcDOIS(char nomeArq[25]){
-    cabecalho cab[1];
+    cabecalho *cab;
+    cab = (cabecalho*) malloc(sizeof(cabecalho));
 
-    lerArq(nomeArq, cab);
-
-    imprimirSaida(cab);
+    int existe;
+    existe = lerArq(nomeArq, cab);
+    
+    if(existe == 1){
+        imprimirSaida(cab);
+    }
 }
 
 void funcTRES(char nomeArq[25]){}

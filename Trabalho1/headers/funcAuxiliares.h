@@ -12,6 +12,6 @@ int lerRegistro(FILE *arq, pagDisco *pag);
 
 void lerPagDisco(FILE *arq, pagDisco *pag, cabecalho *cab);
 
-void lerArq(char nome[25], cabecalho *cab);
+int lerArq(char nome[25], cabecalho *cab);
 
 void imprimirSaida(cabecalho *cab);

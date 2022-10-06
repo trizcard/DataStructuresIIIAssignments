@@ -84,6 +84,10 @@ int lerRegistro(FILE *arq, pagDisco *pag){
 }
 
 void lerPagDisco(FILE *arq, pagDisco *pag, cabecalho *cab){
+    if (arq == NULL){
+        printf("Registro inexistente.");
+        return;
+    }
 
     while(arq != NULL){
         lerRegistro(arq, pag);
@@ -104,12 +108,12 @@ void lerPagDisco(FILE *arq, pagDisco *pag, cabecalho *cab){
     cab->topo = -1;
 }
 
-void lerArq(char nome[25], cabecalho *cab){
-    FILE *arq;
+int lerArq(char nome[25], cabecalho *cab){
+    FILE *arq = NULL;
     arq = fopen(nome, "rb");
     if (arq == NULL){
-        printf("Falha no carregamento do arquivo.");
-        return;
+        printf("Falha no processamento do arquivo.\n");
+        return 0;
     }
 
     strcpy(cab->status, "0");
@@ -129,6 +133,7 @@ void lerArq(char nome[25], cabecalho *cab){
     lerPagDisco(arq, pag, cab);
 
     fclose(arq);
+    return 1;
 }
 
 void imprimirSaida(cabecalho *cab){
