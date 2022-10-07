@@ -19,9 +19,10 @@ void imprimirSaida(cabecalho *cab);
 
 int analisarCampo(char nomeCampo[25]);
 
-void filtrar(cabecalho *cab, pagDisco *pagNova);
+void filtrar(cabecalho *cab, pagDisco *pagNova, int tipo);
 
-void rodarPagina(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int campo, char valorCampo[25]);
+void rodarPagina(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int campo, char valorCampo[25], int tipo);
 
 void passarReg(cabecalho *cab, pagDisco *pag, pagDisco *pagNova);
 
+void removeReg(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int reg);

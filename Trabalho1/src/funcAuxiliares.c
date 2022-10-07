@@ -144,7 +144,7 @@ void imprimirSaida(cabecalho *cab){
         registro *regAux;
         regAux = pagAux->inicio;
 
-        while(regAux->prox != NULL){
+        while(regAux->prox != NULL && strcpy(regAux->removido, "1")){
             printf("Identificador do ponto: %d\n", regAux->idConecta);
             printf("Nome do ponto: %s\n", regAux->nomePoPs);
             printf("Nome do pais: %s\n", regAux->nomePais);
@@ -178,20 +178,13 @@ int analisarCampo(char nomeCampo[25]){
     }
 }
 
-void filtrar(cabecalho *cab, pagDisco *pagNova){
+void filtrar(cabecalho *cab, pagDisco *pagNova, int tipo){
     int n;
     scanf("%d", &n);
 
     char nomeCampo[25];
 
     char valorCampo[25];
-
-    //reiniciar cabecalho
-    cab->topo = -1;
-    cab->proxRRN = 0;
-    cab->nRegRemov = 0;
-    cab->nPagDisco = 0;
-    cab->qtdCompact = 0;
 
     for(int i = 0; i < n; i++){
         fscanf(stdin, "%s", nomeCampo);
@@ -203,58 +196,77 @@ void filtrar(cabecalho *cab, pagDisco *pagNova){
         pagDisco *pagAux;
         pagAux = NULL;
 
-        rodarPagina(cab, pagNova, pagAux, campo, valorCampo);
+        rodarPagina(cab, pagNova, pagAux, campo, valorCampo, tipo);
     }
 
 }
 
-void rodarPagina(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int campo, char valorCampo[25]){
+void rodarPagina(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int campo, char valorCampo[25], int tipo){
+    int nReg = 0;
     while (pag->prox != NULL){
         while (pag->inicio->prox != NULL){
             switch (campo){
                 case 1:
                     if (pag->inicio->idConecta == atoi(valorCampo)){
                         passarReg(cab, pag, pagNova);
-                        cab->proxRRN++;
-
+                    }
+                    else if (pag->inicio->idConecta != atoi(valorCampo) && tipo == 4){
+                        removeReg(cab, pag, pagNova, nReg);
                     }
                     break;
                 case 2:
-                    if (!strcmp(pag->inicio->siglaPais, valorCampo)){
+                    if (!strcmp(pag->inicio->siglaPais, valorCampo) && tipo == 3){
                         passarReg(cab, pag, pagNova);
+                    } else if (strcmp(pag->inicio->siglaPais, valorCampo) && tipo == 4){
+                        removeReg(cab, pag, pagNova, nReg);
                     }
                     break;
                 case 3:
-                    if (pag->inicio->idPoPsConec == atoi(valorCampo)){
+                    if (pag->inicio->idPoPsConec == atoi(valorCampo) && tipo == 3){
                         passarReg(cab, pag, pagNova);
+                    } else if (pag->inicio->idPoPsConec != atoi(valorCampo) && tipo == 4){
+                        removeReg(cab, pag, pagNova, nReg);
                     }
                     break;
                 case 4:
-                    if (!strcmp(pag->inicio->undMedida, valorCampo)){
-                        passarReg(cab, pag, pagNova);                        
+                    if (!strcmp(pag->inicio->undMedida, valorCampo) && tipo == 3){
+                        passarReg(cab, pag, pagNova);
+                    } else if (strcmp(pag->inicio->undMedida, valorCampo) && tipo == 4){
+                        removeReg(cab, pag, pagNova, nReg);                           
                     }
                     break;
                 case 5:
-                    if (pag->inicio->veloc == atoi(valorCampo)){
+                    if (pag->inicio->veloc == atoi(valorCampo) && tipo == 3){
                         passarReg(cab, pag, pagNova);
+                    } else if (pag->inicio->veloc != atoi(valorCampo) && tipo == 4){
+                        removeReg(cab, pag, pagNova, nReg);
                     }
                     break;
                 case 6:
-                    if (!strcmp(pag->inicio->nomePoPs, valorCampo)){
+                    if (!strcmp(pag->inicio->nomePoPs, valorCampo) && tipo == 3){
                         passarReg(cab, pag, pagNova);
+                    } else if (strcmp(pag->inicio->nomePoPs, valorCampo) && tipo == 4){
+                        removeReg(cab, pag, pagNova, nReg);
                     }
                     break;
                 case 7:
-                    if (!strcmp(pag->inicio->nomePais, valorCampo)){
+                    if (!strcmp(pag->inicio->nomePais, valorCampo) && tipo == 3){
                         passarReg(cab, pag, pagNova);
+                    } else if (strcmp(pag->inicio->nomePais, valorCampo) && tipo == 4){
+                        removeReg(cab, pag, pagNova, nReg);
                     }
                     break;
                 
                 default:
-                    printf("Campo filtrado nao existe\n");
+                    if(tipo == 3){
+                        printf("Campo filtrado nao existe\n");
+                    } else{
+                        printf("Campo removido nao existe\n");
+                    }
                     return;
             }
             pag->inicio = pag->inicio->prox;
+            nReg++;
         }
         pag = pag->prox;
         cab->nPagDisco++;
@@ -266,21 +278,28 @@ void passarReg(cabecalho *cab, pagDisco *pag, pagDisco *pagNova){
         pagNova->inicio = pag->inicio;
         pagNova->fim = pag->inicio;
         pagNova->tamanho = 1;
-    } else{
-        if (pagNova->tamanho == 15){
-            pagDisco *pagAnt;
-            pagAnt = pagNova;
-            pagAnt->prox = pagNova;
-            pagNova->inicio = NULL;
-            pagNova->fim = NULL;
+    } else if (pagNova->tamanho == 15){
+        pagDisco *pagAnt;
+        pagAnt = pagNova;
+        pagAnt->prox = pagNova;
+        pagNova->inicio = NULL;
+        pagNova->fim = NULL;
 
-            cab->nPagDisco++;
-            pagNova->inicio = pag->inicio;
-            pagNova->fim = pag->inicio;
-            pagNova->tamanho = 1;
-        } else{
-            pagNova->inicio->prox = pag->inicio;
-            pagNova->fim = pag->inicio;
-        }
+        cab->nPagDisco++;
+        pagNova->inicio = pag->inicio;
+        pagNova->fim = pag->inicio;
+        pagNova->tamanho = 1;
+    } else{
+        pagNova->inicio->prox = pag->inicio;
+        pagNova->fim = pag->inicio;
     }
+}
+
+void removeReg(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int reg){
+    passarReg(cab, pag, pagNova);
+    strcpy(pagNova->fim->removido, "1");
+    int RRN = reg * 64 - 1;
+    pagNova->fim->encadeamento = cab->topo;
+    cab->topo = RRN;
+    cab->nRegRemov++;
 }
