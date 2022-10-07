@@ -15,7 +15,24 @@ void funcDOIS(char nomeArq[25]){
     }
 }
 
-void funcTRES(char nomeArq[25]){}
+void funcTRES(char nomeArq[25]){
+    cabecalho *cab;
+    cab = (cabecalho*) malloc(sizeof(cabecalho));
+
+    int existe;
+    existe = lerArq(nomeArq, cab);
+
+    if(existe == 1){
+        pagDisco *pagNova;
+        if (!strcmp(cab->status, "0")){
+            return;
+        }
+        pagNova = cab->prox;
+        filtrar(cab, pagNova);
+
+        imprimirSaida(cab);
+    }
+}
 
 void funcQUATRO(char nomeArq[25]){}
 

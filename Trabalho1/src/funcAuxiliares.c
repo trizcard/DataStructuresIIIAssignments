@@ -95,7 +95,6 @@ void lerPagDisco(FILE *arq, pagDisco *pag, cabecalho *cab){
         if(pag->tamanho == 15){
             pagDisco *pagAnt;
             pagAnt = pag;
-            pagAnt->prox = (pagDisco*) malloc(sizeof(pagDisco));
             pagAnt->prox = pag;
             pag->inicio = NULL;
             pag->fim = NULL;
@@ -157,4 +156,131 @@ void imprimirSaida(cabecalho *cab){
         pagAux = pagAux->prox;
     }
     printf("Numero de paginas de disco: %d\n\n", cab->nPagDisco);
+}
+
+int analisarCampo(char nomeCampo[25]){
+    if (!strcmp(nomeCampo, "idConecta")){
+        return 1;
+    } else if (!strcmp(nomeCampo, "siglaPais")){
+        return 2;
+    } else if (!strcmp(nomeCampo, "idPoPsConectado")){
+        return 3;
+    } else if (!strcmp(nomeCampo, "unidadeMedida")){
+        return 4;
+    } else if (!strcmp(nomeCampo, "velocidade")){
+        return 5;
+    } else if (!strcmp(nomeCampo, "nomePoPs")){
+        return 6;
+    } else if (!strcmp(nomeCampo, "nomePais")){
+        return 7;
+    } else {
+        return 0;
+    }
+}
+
+void filtrar(cabecalho *cab, pagDisco *pagNova){
+    int n;
+    scanf("%d", &n);
+
+    char nomeCampo[25];
+
+    char valorCampo[25];
+
+    //reiniciar cabecalho
+    cab->topo = -1;
+    cab->proxRRN = 0;
+    cab->nRegRemov = 0;
+    cab->nPagDisco = 0;
+    cab->qtdCompact = 0;
+
+    for(int i = 0; i < n; i++){
+        fscanf(stdin, "%s", nomeCampo);
+        fscanf(stdin, "%s", valorCampo);
+        scan_quote_string(valorCampo);
+
+        int campo;
+        campo = analisarCampo(nomeCampo);
+        pagDisco *pagAux;
+        pagAux = NULL;
+
+        rodarPagina(cab, pagNova, pagAux, campo, valorCampo);
+    }
+
+}
+
+void rodarPagina(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int campo, char valorCampo[25]){
+    while (pag->prox != NULL){
+        while (pag->inicio->prox != NULL){
+            switch (campo){
+                case 1:
+                    if (pag->inicio->idConecta == atoi(valorCampo)){
+                        passarReg(cab, pag, pagNova);
+                        cab->proxRRN++;
+
+                    }
+                    break;
+                case 2:
+                    if (!strcmp(pag->inicio->siglaPais, valorCampo)){
+                        passarReg(cab, pag, pagNova);
+                    }
+                    break;
+                case 3:
+                    if (pag->inicio->idPoPsConec == atoi(valorCampo)){
+                        passarReg(cab, pag, pagNova);
+                    }
+                    break;
+                case 4:
+                    if (!strcmp(pag->inicio->undMedida, valorCampo)){
+                        passarReg(cab, pag, pagNova);                        
+                    }
+                    break;
+                case 5:
+                    if (pag->inicio->veloc == atoi(valorCampo)){
+                        passarReg(cab, pag, pagNova);
+                    }
+                    break;
+                case 6:
+                    if (!strcmp(pag->inicio->nomePoPs, valorCampo)){
+                        passarReg(cab, pag, pagNova);
+                    }
+                    break;
+                case 7:
+                    if (!strcmp(pag->inicio->nomePais, valorCampo)){
+                        passarReg(cab, pag, pagNova);
+                    }
+                    break;
+                
+                default:
+                    printf("Campo filtrado nao existe\n");
+                    return;
+            }
+            pag->inicio = pag->inicio->prox;
+        }
+        pag = pag->prox;
+        cab->nPagDisco++;
+    }
+}
+
+void passarReg(cabecalho *cab, pagDisco *pag, pagDisco *pagNova){
+    if(pagNova->inicio == NULL){
+        pagNova->inicio = pag->inicio;
+        pagNova->fim = pag->inicio;
+        pagNova->tamanho = 1;
+    } else{
+        if (pagNova->tamanho == 15){
+            pagDisco *pagAnt;
+            pagAnt = pagNova;
+            pagAnt->prox = pagNova;
+            pagNova->inicio = NULL;
+            pagNova->fim = NULL;
+
+            cab->nPagDisco++;
+            pagNova->inicio = pag->inicio;
+            pagNova->fim = pag->inicio;
+            pagNova->tamanho = 1;
+        } else{
+            pagNova->inicio->prox = pag->inicio;
+            pagNova->fim = pag->inicio;
+        }
+    }
 }

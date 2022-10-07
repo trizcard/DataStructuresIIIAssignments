@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "cabecalho.h"
+#include "funcFornecidas.h"
 #define LIXO '$'
 
 void addLixo(char *lixo, int inicio, int tam);
@@ -15,3 +16,12 @@ void lerPagDisco(FILE *arq, pagDisco *pag, cabecalho *cab);
 int lerArq(char nome[25], cabecalho *cab);
 
 void imprimirSaida(cabecalho *cab);
+
+int analisarCampo(char nomeCampo[25]);
+
+void filtrar(cabecalho *cab, pagDisco *pagNova);
+
+void rodarPagina(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int campo, char valorCampo[25]);
+
+void passarReg(cabecalho *cab, pagDisco *pag, pagDisco *pagNova);
+
