@@ -4,57 +4,46 @@ void funcUM(char nomeArq[25]){
 }
 
 void funcDOIS(char nomeArq[25]){
-    cabecalho *cab;
-    cab = (cabecalho*) malloc(sizeof(cabecalho));
+    // abre arquivo e verifica se funcionou de acordo com a funcao
+    FILE *arq = NULL;
+    arq = fopen(nomeArq, "rb");
 
-    int existe;
-    existe = lerArq(nomeArq, cab);
-    
-    if(existe == 1){
-        imprimirSaida(cab);
+    if (arq == NULL){
+        printf("Falha no processamento do arquivo.\n");
+        return;
     }
+
+    imprimirSaida(arq);
+    fclose(arq);
 }
 
 void funcTRES(char nomeArq[25]){
-    cabecalho *cab;
-    cab = (cabecalho*) malloc(sizeof(cabecalho));
+    // abre arquivo e verifica se funcionou de acordo com a funcao
+    FILE *arq = NULL;
+    arq = fopen(nomeArq, "rb");
 
-    int existe;
-    existe = lerArq(nomeArq, cab);
-
-    if(existe == 1){
-        pagDisco *pagNova;
-        if (!strcmp(cab->status, "0")){
-            return;
-        }
-        pagNova = cab->prox;
-        filtrar(cab, pagNova, 3);
-
-        imprimirSaida(cab);
+    if (arq == NULL){
+        printf("Falha no processamento do arquivo.\n");
+        return;
     }
-    free(cab);
+
+    filtrar(arq, 3);
+    fclose(arq);
 }
 
 void funcQUATRO(char nomeArq[25]){
-    cabecalho *cab;
-    cab = (cabecalho*) malloc(sizeof(cabecalho));
+    // abre arquivo e verifica se funcionou de acordo com a funcao
+    FILE *arq = NULL;
+    arq = fopen(nomeArq, "wb");
 
-    int existe;
-    existe = lerArq(nomeArq, cab);
-
-    cabecalho *cabOriginal;
-    cabOriginal = (cabecalho*) malloc(sizeof(cabecalho));
-
-    if(existe == 1){
-        pagDisco *pagNova;
-        if (!strcmp(cab->status, "0")){
-            return;
-        }
-        pagNova = cab->prox;
-        filtrar(cab, pagNova, 4);
+    if (arq == NULL){
+        printf("Falha no processamento do arquivo.\n");
+        return;
     }
-    free(cab);
-    free(cabOriginal);
+
+    filtrar(arq, 4);
+    fclose(arq);
+    binarioNaTela(nomeArq);
 }
 
 void funcCINCO(char nomeArq[25]){}

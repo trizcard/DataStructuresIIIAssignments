@@ -5,9 +5,10 @@ int main() {
     int func;
     char nomeArq[25];
     
-    scanf("%d ", &func);
-    fscanf(stdin, "%s", nomeArq);
+    scanf("%d ", &func); // seleciona funcao
+    fscanf(stdin, "%s", nomeArq); // nome do arquivo
 
+    // chama a funcao a ser executada
     switch (func) {
         case 1:
             funcUM(nomeArq);

@@ -41,3 +41,9 @@ struct pagDisco{
     struct pagDisco *prox;
 };
 typedef struct pagDisco pagDisco;
+
+struct filtro{
+    char nomeCampo[25];
+    char valorCampo[25];
+};
+typedef struct filtro filtro;

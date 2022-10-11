@@ -15,17 +15,17 @@ int lerCampoVar(char* string, char *strPoPs, char *strPais){
         strPoPs[i] = c;
         strPoPs = realloc(strPoPs, (i+1)*sizeof(char));
         i++;
-    } while(c != '|');
+    } while(c != '|' || i < 44);
     int j = i;
     i++;
-    while(c != '|' || c != '\0'){
+    while(c != '|' || i < 44){
         c = string[i];
         strPais[i] = c;
         strPais = realloc(strPais, (j-(i+1))*sizeof(char));
         i++;
     }
 
-    if (c == '\0'){
+    if (i < 44){
         int tam = 44 - i;
         addLixo(strPais, i, tam);
         return 0; // retorna 0 se não houver truncamento
@@ -36,16 +36,23 @@ int lerCampoVar(char* string, char *strPoPs, char *strPais){
     }
 }
 
-int lerRegistro(FILE *arq, pagDisco *pag){
-    char removido[1];
-    fread(removido, sizeof(char), 1, arq);
+void lerCabecalho(FILE *arq, cabecalho *cab){
+    fread(cab->status, sizeof(char), 1, arq);
+    fread(&cab->topo, sizeof(int), 1, arq);
+    fread(&cab->proxRRN, sizeof(int), 1, arq);
+    fread(&cab->nRegRemov, sizeof(int), 1, arq);
+    fread(&cab->nPagDisco, sizeof(int), 1, arq);
+    fread(&cab->qtdCompact, sizeof(int), 1, arq);
+    fread(cab->lixo, sizeof(char), 939, arq);
+}
 
-    if (!strcmp(removido, "*")){
+int lerRegistro(FILE *arq, registro *reg){
+    fread(reg->removido, sizeof(char), 1, arq);
+
+    if (!strcmp(reg->removido, "1")){
         fseek(arq, 64, SEEK_CUR);
         return 0;
     }
-    registro reg[1];
-    reg->removido[0] = removido[0];
 
     fread(&reg->encadeamento, sizeof(int), 1, arq);
     fread(&reg->idConecta, sizeof(int), 1, arq);
@@ -65,241 +72,145 @@ int lerRegistro(FILE *arq, pagDisco *pag){
     strcpy(reg->nomePoPs, nomePoPs);
     strcpy(reg->nomePais, nomePais);
 
-    if(pag->inicio == NULL){
-        pag->inicio = reg;
-        pag->fim = reg;
-        pag->tamanho = 1;
-    }else{
-        registro *regAnt;
-        regAnt = pag->fim;
-        regAnt->prox = reg;
-        pag->fim = reg;
-        pag->tamanho++;
-    }
-
     free(nomePais);
     free(nomePoPs);
 
     return 1;
 }
 
-void lerPagDisco(FILE *arq, pagDisco *pag, cabecalho *cab){
-    if (arq == NULL){
-        printf("Registro inexistente.");
-        return;
-    }
+void imprimeRegistro(registro *regAux){
+    printf("Identificador do ponto: %d\n", regAux->idConecta);
+    printf("Nome do ponto: %s\n", regAux->nomePoPs);
+    printf("Nome do pais: %s\n", regAux->nomePais);
+    printf("Sigla do pais: %s\n", regAux->siglaPais);
+    printf("Identificador do ponto conectado: %d\n", regAux->idPoPsConec);
+    printf("Velocidade de transmissao: %d Mbps\n\n", regAux->veloc);
+}
 
+void removerRegistro(FILE *arq, registro *reg, cabecalho *cab){
+    int RRNatual = SEEK_CUR;
+    fseek(arq, -64, SEEK_CUR);
+    fwrite("1", sizeof(char), 1, arq);
+    fwrite(&cab->topo, sizeof(int), 1, arq);
+    cab->topo = (RRNatual-64);
+    cab->nRegRemov++;
+    fseek(arq, 64, SEEK_CUR);
+}
+
+void imprimirSaida(FILE *arq){
+    // cria um registro auxiliar e cabecalho auxiliar
+    registro *regAux;
+    regAux = (registro*) malloc(sizeof(registro));
+    cabecalho *cabAux;
+    cabAux = (cabecalho*) malloc(sizeof(cabecalho));
+
+    lerCabecalho(arq, cabAux);
+
+    // percorre todo o arquivo
     while(arq != NULL){
-        lerRegistro(arq, pag);
-        cab->proxRRN++;
-        if(pag->tamanho == 15){
-            pagDisco *pagAnt;
-            pagAnt = pag;
-            pagAnt->prox = pag;
-            pag->inicio = NULL;
-            pag->fim = NULL;
-            pag->tamanho = 0;
-            pag->prox = NULL;
-            cab->nPagDisco++;
-        }
-    }
-    cab->status[0] = '1';
-    cab->topo = -1;
-}
-
-int lerArq(char nome[25], cabecalho *cab){
-    FILE *arq = NULL;
-    arq = fopen(nome, "rb");
-    if (arq == NULL){
-        printf("Falha no processamento do arquivo.\n");
-        return 0;
-    }
-
-    strcpy(cab->status, "0");
-    cab->topo = -1;
-    cab->proxRRN = 0;
-    cab->nRegRemov = 0;
-    cab->nPagDisco = 0;
-    cab->qtdCompact = 0;
-    addLixo(cab->lixo, 0, 939);
-    
-    pagDisco pag[1];
-
-    cab->prox = pag;
-    pag->tamanho = 1;
-    pag->prox = NULL;
-
-    lerPagDisco(arq, pag, cab);
-
-    fclose(arq);
-    return 1;
-}
-
-void imprimirSaida(cabecalho *cab){
-    pagDisco *pagAux;
-
-    pagAux = cab->prox;
-
-    while(pagAux->prox != NULL){
-        registro *regAux;
-        regAux = pagAux->inicio;
-
-        while(regAux->prox != NULL && strcpy(regAux->removido, "1")){
-            printf("Identificador do ponto: %d\n", regAux->idConecta);
-            printf("Nome do ponto: %s\n", regAux->nomePoPs);
-            printf("Nome do pais: %s\n", regAux->nomePais);
-            printf("Sigla do pais: %s\n", regAux->siglaPais);
-            printf("Identificador do ponto conectado: %d\n", regAux->idPoPsConec);
-            printf("Velocidade de transmissao: %d Mbps\n\n", regAux->veloc);
+        // se registro removido retorna 0
+        if (lerRegistro(arq, regAux)){
+            imprimeRegistro(regAux);
             regAux = regAux->prox;
         }
-        pagAux = pagAux->prox;
     }
-    printf("Numero de paginas de disco: %d\n\n", cab->nPagDisco);
+    printf("Numero de paginas de disco: %d\n\n", cabAux->nPagDisco);
+    free(regAux);
+    free(cabAux);
 }
 
-int analisarCampo(char nomeCampo[25]){
-    if (!strcmp(nomeCampo, "idConecta")){
-        return 1;
-    } else if (!strcmp(nomeCampo, "siglaPais")){
-        return 2;
-    } else if (!strcmp(nomeCampo, "idPoPsConectado")){
-        return 3;
-    } else if (!strcmp(nomeCampo, "unidadeMedida")){
-        return 4;
-    } else if (!strcmp(nomeCampo, "velocidade")){
-        return 5;
-    } else if (!strcmp(nomeCampo, "nomePoPs")){
-        return 6;
-    } else if (!strcmp(nomeCampo, "nomePais")){
-        return 7;
+int analisarCampo(filtro *filtros, int i, registro *reg){
+    if (!strcmp(filtros[i].nomeCampo, "idConecta")){
+        int idConecta = atoi(filtros[i].valorCampo);
+        if (idConecta == reg->idConecta){
+            return 1;
+        }
+        return 0;
+    } else if (!strcmp(filtros[i].nomeCampo, "siglaPais")){
+        if (!strcmp(filtros[i].valorCampo, reg->siglaPais)){
+            return 1;
+        }
+        return 0;
+    } else if (!strcmp(filtros[i].nomeCampo, "idPoPsConectado")){
+        int idPoPsConectado = atoi(filtros[i].valorCampo);
+        if (idPoPsConectado == reg->idPoPsConec){
+            return 1;
+        }
+        return 0;
+    } else if (!strcmp(filtros[i].nomeCampo, "unidadeMedida")){
+        if (!strcmp(filtros[i].valorCampo, reg->undMedida)){
+            return 1;
+        }
+        return 0;
+    } else if (!strcmp(filtros[i].nomeCampo, "velocidade")){
+        int velocidade = atoi(filtros[i].valorCampo);
+        if (velocidade == reg->veloc){
+            return 1;
+        }
+        return 0;
+    } else if (!strcmp(filtros[i].nomeCampo, "nomePoPs")){
+        if (!strcmp(filtros[i].valorCampo, reg->nomePoPs)){
+            return 1;
+        }
+        return 0;
+    } else if (!strcmp(filtros[i].nomeCampo, "nomePais")){
+        if (!strcmp(filtros[i].valorCampo, reg->nomePais)){
+            return 1;
+        }
+        return 0;
     } else {
         return 0;
     }
 }
 
-void filtrar(cabecalho *cab, pagDisco *pagNova, int tipo){
+void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
     int n;
     scanf("%d", &n);
+    int filtrados = 1; // se for 1, o registro passou pelos filtros
 
-    char nomeCampo[25];
-
-    char valorCampo[25];
+    filtro filtros[n];
 
     for(int i = 0; i < n; i++){
-        fscanf(stdin, "%s", nomeCampo);
-        fscanf(stdin, "%s", valorCampo);
-        scan_quote_string(valorCampo);
-
-        int campo;
-        campo = analisarCampo(nomeCampo);
-        pagDisco *pagAux;
-        pagAux = NULL;
-
-        rodarPagina(cab, pagNova, pagAux, campo, valorCampo, tipo);
+        fscanf(stdin, "%s", filtros[i].nomeCampo);
+        fscanf(stdin, "%s", filtros[i].valorCampo);
+        scan_quote_string(filtros[i].valorCampo);
     }
 
-}
+    // cria um registro auxiliar
+    registro *regAux;
+    regAux = (registro*) malloc(sizeof(registro));
 
-void rodarPagina(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int campo, char valorCampo[25], int tipo){
-    int nReg = 0;
-    while (pag->prox != NULL){
-        while (pag->inicio->prox != NULL){
-            switch (campo){
-                case 1:
-                    if (pag->inicio->idConecta == atoi(valorCampo)){
-                        passarReg(cab, pag, pagNova);
-                    }
-                    else if (pag->inicio->idConecta != atoi(valorCampo) && tipo == 4){
-                        removeReg(cab, pag, pagNova, nReg);
-                    }
-                    break;
-                case 2:
-                    if (!strcmp(pag->inicio->siglaPais, valorCampo) && tipo == 3){
-                        passarReg(cab, pag, pagNova);
-                    } else if (strcmp(pag->inicio->siglaPais, valorCampo) && tipo == 4){
-                        removeReg(cab, pag, pagNova, nReg);
-                    }
-                    break;
-                case 3:
-                    if (pag->inicio->idPoPsConec == atoi(valorCampo) && tipo == 3){
-                        passarReg(cab, pag, pagNova);
-                    } else if (pag->inicio->idPoPsConec != atoi(valorCampo) && tipo == 4){
-                        removeReg(cab, pag, pagNova, nReg);
-                    }
-                    break;
-                case 4:
-                    if (!strcmp(pag->inicio->undMedida, valorCampo) && tipo == 3){
-                        passarReg(cab, pag, pagNova);
-                    } else if (strcmp(pag->inicio->undMedida, valorCampo) && tipo == 4){
-                        removeReg(cab, pag, pagNova, nReg);                           
-                    }
-                    break;
-                case 5:
-                    if (pag->inicio->veloc == atoi(valorCampo) && tipo == 3){
-                        passarReg(cab, pag, pagNova);
-                    } else if (pag->inicio->veloc != atoi(valorCampo) && tipo == 4){
-                        removeReg(cab, pag, pagNova, nReg);
-                    }
-                    break;
-                case 6:
-                    if (!strcmp(pag->inicio->nomePoPs, valorCampo) && tipo == 3){
-                        passarReg(cab, pag, pagNova);
-                    } else if (strcmp(pag->inicio->nomePoPs, valorCampo) && tipo == 4){
-                        removeReg(cab, pag, pagNova, nReg);
-                    }
-                    break;
-                case 7:
-                    if (!strcmp(pag->inicio->nomePais, valorCampo) && tipo == 3){
-                        passarReg(cab, pag, pagNova);
-                    } else if (strcmp(pag->inicio->nomePais, valorCampo) && tipo == 4){
-                        removeReg(cab, pag, pagNova, nReg);
-                    }
-                    break;
-                
-                default:
-                    if(tipo == 3){
-                        printf("Campo filtrado nao existe\n");
-                    } else{
-                        printf("Campo removido nao existe\n");
-                    }
-                    return;
+    // cria e le cabecalho
+    cabecalho *cab;
+    cab = (cabecalho*) malloc(sizeof(cabecalho));
+    lerCabecalho(arq, cab);
+
+    // percorre todo o arquivo
+    while(arq != NULL){
+        // se registro removido retorna 0
+        if (lerRegistro(arq, regAux)){
+            for (int i = 0; i < n; i++){
+                filtrados = (analisarCampo(filtros, i, regAux)) * filtrados;
             }
-            pag->inicio = pag->inicio->prox;
-            nReg++;
+            if (tipo == 3 && filtrados){
+                imprimeRegistro(regAux);
+            } else if (tipo == 4 && filtrados){
+                removerRegistro(arq, regAux, cab);
+            }
+            regAux = regAux->prox;
         }
-        pag = pag->prox;
-        cab->nPagDisco++;
     }
-}
 
-void passarReg(cabecalho *cab, pagDisco *pag, pagDisco *pagNova){
-    if(pagNova->inicio == NULL){
-        pagNova->inicio = pag->inicio;
-        pagNova->fim = pag->inicio;
-        pagNova->tamanho = 1;
-    } else if (pagNova->tamanho == 15){
-        pagDisco *pagAnt;
-        pagAnt = pagNova;
-        pagAnt->prox = pagNova;
-        pagNova->inicio = NULL;
-        pagNova->fim = NULL;
-
-        cab->nPagDisco++;
-        pagNova->inicio = pag->inicio;
-        pagNova->fim = pag->inicio;
-        pagNova->tamanho = 1;
-    } else{
-        pagNova->inicio->prox = pag->inicio;
-        pagNova->fim = pag->inicio;
+    if (tipo == 3){
+        printf("Numero de paginas de disco: %d\n\n", cab->nPagDisco);
+    } else if (tipo == 4){
+        // atualiza cabecalho
+        fseek(arq, 1, SEEK_SET);
+        fwrite(&cab->topo, sizeof(int), 1, arq);
+        fseek(arq, 9, SEEK_SET);
+        fwrite(&cab->nRegRemov, sizeof(int), 1, arq);
     }
-}
 
-void removeReg(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int reg){
-    passarReg(cab, pag, pagNova);
-    strcpy(pagNova->fim->removido, "1");
-    int RRN = reg * 64 - 1;
-    pagNova->fim->encadeamento = cab->topo;
-    cab->topo = RRN;
-    cab->nRegRemov++;
+    free(regAux);
+    free(cab);
 }

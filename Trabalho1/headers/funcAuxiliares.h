@@ -9,20 +9,16 @@ void addLixo(char *lixo, int inicio, int tam);
 
 int lerCampoVar(char* string, char *strPais, char *strPoPs);
 
-int lerRegistro(FILE *arq, pagDisco *pag);
+void lerCabecalho(FILE *arq, cabecalho *cab);
 
-void lerPagDisco(FILE *arq, pagDisco *pag, cabecalho *cab);
+int lerRegistro(FILE *arq, registro *reg);
 
-int lerArq(char nome[25], cabecalho *cab);
+void imprimeRegistro(registro *regAux);
 
-void imprimirSaida(cabecalho *cab);
+void removerRegistro(FILE *arq, registro *reg, cabecalho *cab);
 
-int analisarCampo(char nomeCampo[25]);
+void imprimirSaida(FILE *arq);
 
-void filtrar(cabecalho *cab, pagDisco *pagNova, int tipo);
+int analisarCampo(filtro *filtros, int i, registro *reg);
 
-void rodarPagina(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int campo, char valorCampo[25], int tipo);
-
-void passarReg(cabecalho *cab, pagDisco *pag, pagDisco *pagNova);
-
-void removeReg(cabecalho *cab, pagDisco *pag, pagDisco *pagNova, int reg);
+void filtrar(FILE *arq, int tipo);
