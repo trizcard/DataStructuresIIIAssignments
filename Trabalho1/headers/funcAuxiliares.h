@@ -7,7 +7,7 @@
 
 void addLixo(char *lixo, int inicio, int tam);
 
-int lerCampoVar(char* string, char *strPais, char *strPoPs);
+void lerCampoVar(char* string, char *strPais, char *strPoPs);
 
 void lerCabecalho(FILE *arq, cabecalho *cab);
 

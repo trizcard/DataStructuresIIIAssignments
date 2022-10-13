@@ -1,4 +1,5 @@
 #include "funcAuxiliares.h"
+// 2 topologiaRede.bin
 
 void addLixo(char *lixo, int inicio, int tam){
     for (int i = inicio; i < (inicio + tam); i++){
@@ -6,34 +7,26 @@ void addLixo(char *lixo, int inicio, int tam){
     }
 }
 
-int lerCampoVar(char* string, char *strPoPs, char *strPais){
+void lerCampoVar(char *string, char *strPoPs, char *strPais){
     char c = 0;
     int i = 0;
 
     do{
         c = string[i];
         strPoPs[i] = c;
-        strPoPs = realloc(strPoPs, (i+1)*sizeof(char));
         i++;
-    } while(c != '|' || i < 44);
-    int j = i;
+    } while(string[i] != '|' && i < 44);
+    strPoPs[i] = '\0';
     i++;
-    while(c != '|' || i < 44){
-        c = string[i];
-        strPais[i] = c;
-        strPais = realloc(strPais, (j-(i+1))*sizeof(char));
+    int j = i;
+    
+    c = string[i];
+    while(c != '|' && i < 44){
+        strPais[(i-j)] = c;
         i++;
+        c = string[i];
     }
-
-    if (i < 44){
-        int tam = 44 - i;
-        addLixo(strPais, i, tam);
-        return 0; // retorna 0 se não houver truncamento
-    } else {
-        strcpy(string, "|");
-        strPais[(i)] = string[0];
-        return 1;
-    }
+    strPais[i-j] = '\0';
 }
 
 void lerCabecalho(FILE *arq, cabecalho *cab){
@@ -56,24 +49,17 @@ int lerRegistro(FILE *arq, registro *reg){
 
     fread(&reg->encadeamento, sizeof(int), 1, arq);
     fread(&reg->idConecta, sizeof(int), 1, arq);
-    fread(reg->siglaPais, sizeof(char), 2, arq);
+    fread((reg->siglaPais), sizeof(char), 2, arq);
+    reg->siglaPais[2] = '\0';
     fread(&reg->idPoPsConec, sizeof(int), 1, arq);
-    fread(reg->undMedida, sizeof(char), 1, arq);
+    fread((reg->undMedida), sizeof(char), 1, arq);
+    reg->undMedida[1] = '\0';
     fread(&reg->veloc, sizeof(int), 1, arq);
 
-    char string[44];
-    char *nomePoPs;
-    nomePoPs = (char*) malloc(1*sizeof(char));
-    char *nomePais;
-    nomePais = (char*) malloc(1*sizeof(char));
+    char string[45];
     fread(string, sizeof(char), 44, arq);
-    lerCampoVar(string, nomePoPs, nomePais);
-
-    strcpy(reg->nomePoPs, nomePoPs);
-    strcpy(reg->nomePais, nomePais);
-
-    free(nomePais);
-    free(nomePoPs);
+    
+    lerCampoVar(string, reg->nomePoPs, reg->nomePais);
 
     return 1;
 }
@@ -84,7 +70,7 @@ void imprimeRegistro(registro *regAux){
     printf("Nome do pais: %s\n", regAux->nomePais);
     printf("Sigla do pais: %s\n", regAux->siglaPais);
     printf("Identificador do ponto conectado: %d\n", regAux->idPoPsConec);
-    printf("Velocidade de transmissao: %d Mbps\n\n", regAux->veloc);
+    printf("Velocidade de transmissao: %d %sbps\n\n", regAux->veloc, regAux->undMedida);
 }
 
 void removerRegistro(FILE *arq, registro *reg, cabecalho *cab){
@@ -101,20 +87,25 @@ void imprimirSaida(FILE *arq){
     // cria um registro auxiliar e cabecalho auxiliar
     registro *regAux;
     regAux = (registro*) malloc(sizeof(registro));
+    regAux->nomePoPs = malloc(44*sizeof(char));
+    regAux->nomePais = malloc(44*sizeof(char));
     cabecalho *cabAux;
     cabAux = (cabecalho*) malloc(sizeof(cabecalho));
 
     lerCabecalho(arq, cabAux);
-
+    printf("%d", cabAux->proxRRN);
+    int i = 0;
     // percorre todo o arquivo
-    while(arq != NULL){
+    while(i < cabAux->proxRRN){
         // se registro removido retorna 0
         if (lerRegistro(arq, regAux)){
             imprimeRegistro(regAux);
-            regAux = regAux->prox;
         }
+        i++;
     }
     printf("Numero de paginas de disco: %d\n\n", cabAux->nPagDisco);
+    free(regAux->nomePoPs);
+    free(regAux->nomePais);
     free(regAux);
     free(cabAux);
 }

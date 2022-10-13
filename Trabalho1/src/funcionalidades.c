@@ -12,7 +12,7 @@ void funcDOIS(char nomeArq[25]){
         printf("Falha no processamento do arquivo.\n");
         return;
     }
-
+    
     imprimirSaida(arq);
     fclose(arq);
 }
