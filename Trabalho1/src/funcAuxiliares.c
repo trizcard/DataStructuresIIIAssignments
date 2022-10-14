@@ -10,21 +10,24 @@ void addLixo(char *lixo, int inicio, int tam){
 void lerCampoVar(char *string, char *strPoPs, char *strPais){
     char c = 0;
     int i = 0;
-
-    do{
-        c = string[i];
-        strPoPs[i] = c;
-        i++;
-    } while(string[i] != '|' && i < 44);
+    if (string[0] != '|'){
+        do{
+            c = string[i];
+            strPoPs[i] = c;
+            i++;
+        } while(string[i] != '|' && i < 44);
+    }
     strPoPs[i] = '\0';
     i++;
     int j = i;
     
-    c = string[i];
-    while(c != '|' && i < 44){
-        strPais[(i-j)] = c;
-        i++;
+    if (i < 44){
         c = string[i];
+        while(c != '|' && i < 44){
+            strPais[(i-j)] = c;
+            i++;
+            c = string[i];
+        }
     }
     strPais[i-j] = '\0';
 }
@@ -40,8 +43,8 @@ void lerCabecalho(FILE *arq, cabecalho *cab){
 }
 
 int lerRegistro(FILE *arq, registro *reg){
-    fread(reg->removido, sizeof(char), 1, arq);
 
+    fread(reg->removido, sizeof(char), 1, arq);
     if (!strcmp(reg->removido, "1")){
         fseek(arq, 64, SEEK_CUR);
         return 0;
@@ -50,12 +53,10 @@ int lerRegistro(FILE *arq, registro *reg){
     fread(&reg->encadeamento, sizeof(int), 1, arq);
     fread(&reg->idConecta, sizeof(int), 1, arq);
     fread((reg->siglaPais), sizeof(char), 2, arq);
-    reg->siglaPais[2] = '\0';
     fread(&reg->idPoPsConec, sizeof(int), 1, arq);
     fread((reg->undMedida), sizeof(char), 1, arq);
-    reg->undMedida[1] = '\0';
     fread(&reg->veloc, sizeof(int), 1, arq);
-
+    
     char string[45];
     fread(string, sizeof(char), 44, arq);
     
@@ -65,12 +66,29 @@ int lerRegistro(FILE *arq, registro *reg){
 }
 
 void imprimeRegistro(registro *regAux){
-    printf("Identificador do ponto: %d\n", regAux->idConecta);
-    printf("Nome do ponto: %s\n", regAux->nomePoPs);
-    printf("Nome do pais: %s\n", regAux->nomePais);
-    printf("Sigla do pais: %s\n", regAux->siglaPais);
-    printf("Identificador do ponto conectado: %d\n", regAux->idPoPsConec);
-    printf("Velocidade de transmissao: %d %sbps\n\n", regAux->veloc, regAux->undMedida);
+    if (regAux->idConecta != 0){
+        printf("Identificador do ponto: %d\n", regAux->idConecta);
+    }
+    if (regAux->nomePoPs[0] != '\0'){
+        printf("Nome do ponto: %s\n", regAux->nomePoPs);
+    }
+    if (regAux->nomePais[0] != '\0'){
+        printf("Nome do pais: %s\n", regAux->nomePais);
+    }
+    if (regAux->siglaPais[0] != '$'){
+        char *sigla = regAux->siglaPais;
+        sigla[2] = '\0';
+        printf("Sigla do pais: %s\n", sigla);
+    }
+    if (regAux->idPoPsConec != -1){
+        printf("Identificador do ponto conectado: %d\n", regAux->idPoPsConec);
+    }
+    if (regAux->undMedida[0] != '$'){
+        char *undMed = regAux->undMedida;
+        undMed[1] = '\0';
+        printf("Velocidade de transmissao: %d %sbps\n", regAux->veloc, undMed);
+    }
+    printf("\n");
 }
 
 void removerRegistro(FILE *arq, registro *reg, cabecalho *cab){
@@ -87,8 +105,8 @@ void imprimirSaida(FILE *arq){
     // cria um registro auxiliar e cabecalho auxiliar
     registro *regAux;
     regAux = (registro*) malloc(sizeof(registro));
-    regAux->nomePoPs = malloc(44*sizeof(char));
-    regAux->nomePais = malloc(44*sizeof(char));
+    regAux->nomePoPs = (char *) malloc(45*sizeof(char));
+    regAux->nomePais = (char *) malloc(45*sizeof(char));
     cabecalho *cabAux;
     cabAux = (cabecalho*) malloc(sizeof(cabecalho));
 
@@ -96,7 +114,7 @@ void imprimirSaida(FILE *arq){
     printf("%d", cabAux->proxRRN);
     int i = 0;
     // percorre todo o arquivo
-    while(i < cabAux->proxRRN){
+    while(i < cabAux->proxRRN || i < 10){
         // se registro removido retorna 0
         if (lerRegistro(arq, regAux)){
             imprimeRegistro(regAux);
@@ -157,39 +175,43 @@ int analisarCampo(filtro *filtros, int i, registro *reg){
 void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
     int n;
     scanf("%d", &n);
-    int filtrados = 1; // se for 1, o registro passou pelos filtros
-
+    int filtrados = 0; // se for 1, o registro passou pelos filtros
+    
     filtro filtros[n];
 
     for(int i = 0; i < n; i++){
         fscanf(stdin, "%s", filtros[i].nomeCampo);
-        fscanf(stdin, "%s", filtros[i].valorCampo);
         scan_quote_string(filtros[i].valorCampo);
     }
-
+    
     // cria um registro auxiliar
     registro *regAux;
     regAux = (registro*) malloc(sizeof(registro));
+    regAux->nomePoPs = (char*) malloc(44*sizeof(char));
+    regAux->nomePais = (char*) malloc(44*sizeof(char));
 
     // cria e le cabecalho
     cabecalho *cab;
     cab = (cabecalho*) malloc(sizeof(cabecalho));
     lerCabecalho(arq, cab);
 
+    int regRRN = 0;
     // percorre todo o arquivo
-    while(arq != NULL){
+    while(regRRN < cab->proxRRN || regRRN < (64 * 100)){
         // se registro removido retorna 0
         if (lerRegistro(arq, regAux)){
             for (int i = 0; i < n; i++){
-                filtrados = (analisarCampo(filtros, i, regAux)) * filtrados;
+                filtrados = (analisarCampo(filtros, i, regAux)) + filtrados;
             }
             if (tipo == 3 && filtrados){
                 imprimeRegistro(regAux);
+                filtrados = 0;
             } else if (tipo == 4 && filtrados){
                 removerRegistro(arq, regAux, cab);
+                filtrados = 0;
             }
-            regAux = regAux->prox;
         }
+        regRRN = regRRN + 64;
     }
 
     if (tipo == 3){
@@ -202,6 +224,8 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
         fwrite(&cab->nRegRemov, sizeof(int), 1, arq);
     }
 
+    free(regAux->nomePoPs);
+    free(regAux->nomePais);
     free(regAux);
     free(cab);
 }

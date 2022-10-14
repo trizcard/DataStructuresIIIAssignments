@@ -21,9 +21,9 @@ struct registro{
     char removido[1];
     int encadeamento;
     int idConecta;
-    char siglaPais[3];
+    char siglaPais[2];
     int idPoPsConec;
-    char undMedida[2];
+    char undMedida[1];
     int veloc;
 
     char *nomePoPs;
