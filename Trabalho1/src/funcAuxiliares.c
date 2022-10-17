@@ -195,7 +195,7 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
     int regRRN = 960;
 
     // percorre todo o arquivo
-    while(regRRN < cab->proxRRN || regRRN < (64 * 100)+960){
+    while(regRRN < cab->proxRRN){
         
         // se registro removido retorna 0
         if (lerRegistro(arq, regAux)){
