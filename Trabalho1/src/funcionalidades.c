@@ -34,7 +34,7 @@ void funcTRES(char nomeArq[25]){
 void funcQUATRO(char nomeArq[25]){
     // abre arquivo e verifica se funcionou de acordo com a funcao
     FILE *arq = NULL;
-    arq = fopen(nomeArq, "wb");
+    arq = fopen(nomeArq, "rb+");
 
     if (arq == NULL){
         printf("Falha no processamento do arquivo.\n");

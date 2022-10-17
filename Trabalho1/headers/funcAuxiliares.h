@@ -15,7 +15,7 @@ int lerRegistro(FILE *arq, registro *reg);
 
 void imprimeRegistro(registro *regAux);
 
-void removerRegistro(FILE *arq, registro *reg, cabecalho *cab);
+void removerRegistro(FILE *arq, cabecalho *cab);
 
 void imprimirSaida(FILE *arq);
 

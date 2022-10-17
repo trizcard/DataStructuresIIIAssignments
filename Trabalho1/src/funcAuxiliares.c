@@ -53,8 +53,10 @@ int lerRegistro(FILE *arq, registro *reg){
     fread(&reg->encadeamento, sizeof(int), 1, arq);
     fread(&reg->idConecta, sizeof(int), 1, arq);
     fread((reg->siglaPais), sizeof(char), 2, arq);
+    reg->siglaPais[2] = '\0';
     fread(&reg->idPoPsConec, sizeof(int), 1, arq);
     fread((reg->undMedida), sizeof(char), 1, arq);
+    reg->undMedida[1] = '\0';
     fread(&reg->veloc, sizeof(int), 1, arq);
     
     char string[45];
@@ -76,27 +78,23 @@ void imprimeRegistro(registro *regAux){
         printf("Nome do pais: %s\n", regAux->nomePais);
     }
     if (regAux->siglaPais[0] != '$'){
-        char *sigla = regAux->siglaPais;
-        sigla[2] = '\0';
-        printf("Sigla do pais: %s\n", sigla);
+        printf("Sigla do pais: %s\n", regAux->siglaPais);
     }
     if (regAux->idPoPsConec != -1){
         printf("Identificador do ponto conectado: %d\n", regAux->idPoPsConec);
     }
     if (regAux->undMedida[0] != '$'){
-        char *undMed = regAux->undMedida;
-        undMed[1] = '\0';
-        printf("Velocidade de transmissao: %d %sbps\n", regAux->veloc, undMed);
+        printf("Velocidade de transmissao: %d %sbps\n", regAux->veloc, regAux->undMedida);
     }
     printf("\n");
 }
 
-void removerRegistro(FILE *arq, registro *reg, cabecalho *cab){
-    int RRNatual = SEEK_CUR;
+void removerRegistro(FILE *arq, cabecalho *cab){
     fseek(arq, -64, SEEK_CUR);
     fwrite("1", sizeof(char), 1, arq);
-    fwrite(&cab->topo, sizeof(int), 1, arq);
-    cab->topo = (RRNatual-64);
+    long posicao;
+    posicao = ftell(arq);
+    cab->topo = posicao;
     cab->nRegRemov++;
     fseek(arq, 64, SEEK_CUR);
 }
@@ -187,17 +185,19 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
     // cria um registro auxiliar
     registro *regAux;
     regAux = (registro*) malloc(sizeof(registro));
-    regAux->nomePoPs = (char*) malloc(44*sizeof(char));
-    regAux->nomePais = (char*) malloc(44*sizeof(char));
+    regAux->nomePoPs = (char*) malloc(45*sizeof(char));
+    regAux->nomePais = (char*) malloc(45*sizeof(char));
 
     // cria e le cabecalho
     cabecalho *cab;
     cab = (cabecalho*) malloc(sizeof(cabecalho));
     lerCabecalho(arq, cab);
 
-    int regRRN = 0;
+    int regRRN = 960;
+
     // percorre todo o arquivo
-    while(regRRN < cab->proxRRN || regRRN < (64 * 100)){
+    while(regRRN < cab->proxRRN || regRRN < (64 * 100)+960){
+        
         // se registro removido retorna 0
         if (lerRegistro(arq, regAux)){
             for (int i = 0; i < n; i++){
@@ -207,11 +207,12 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
                 imprimeRegistro(regAux);
                 filtrados = 0;
             } else if (tipo == 4 && filtrados){
-                removerRegistro(arq, regAux, cab);
+                printf("Registro removido: %d\n", regRRN);
+                removerRegistro(arq, cab);
                 filtrados = 0;
             }
         }
-        regRRN = regRRN + 64;
+        regRRN += 64;
     }
 
     if (tipo == 3){
@@ -219,7 +220,7 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
     } else if (tipo == 4){
         // atualiza cabecalho
         fseek(arq, 1, SEEK_SET);
-        fwrite(&cab->topo, sizeof(int), 1, arq);
+        fwrite(&(cab->topo), sizeof(int), 1, arq);
         fseek(arq, 9, SEEK_SET);
         fwrite(&cab->nRegRemov, sizeof(int), 1, arq);
     }

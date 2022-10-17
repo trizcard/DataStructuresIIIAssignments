@@ -21,26 +21,15 @@ struct registro{
     char removido[1];
     int encadeamento;
     int idConecta;
-    char siglaPais[2];
+    char siglaPais[3];
     int idPoPsConec;
-    char undMedida[1];
+    char undMedida[2];
     int veloc;
 
     char *nomePoPs;
     char *nomePais;
-
-    struct registro *prox;
 };
 typedef struct registro registro;
-
-struct pagDisco{
-    struct registro *inicio;
-    struct registro *fim;
-    
-    int tamanho;
-    struct pagDisco *prox;
-};
-typedef struct pagDisco pagDisco;
 
 struct filtro{
     char nomeCampo[25];
