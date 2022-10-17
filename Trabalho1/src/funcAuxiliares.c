@@ -45,7 +45,7 @@ void lerCabecalho(FILE *arq, cabecalho *cab){
 int lerRegistro(FILE *arq, registro *reg){
 
     fread(reg->removido, sizeof(char), 1, arq);
-    if (!strcmp(reg->removido, "1")){
+    if (reg->removido[0] == '1'){
         fseek(arq, 64, SEEK_CUR);
         return 0;
     }
@@ -91,10 +91,10 @@ void imprimeRegistro(registro *regAux){
 
 void removerRegistro(FILE *arq, cabecalho *cab){
     fseek(arq, -64, SEEK_CUR);
-    fwrite("1", sizeof(char), 1, arq);
     long posicao;
     posicao = ftell(arq);
     cab->topo = posicao;
+    fwrite("1", sizeof(char), 1, arq);
     cab->nRegRemov++;
     fseek(arq, 64, SEEK_CUR);
 }
@@ -109,7 +109,6 @@ void imprimirSaida(FILE *arq){
     cabAux = (cabecalho*) malloc(sizeof(cabecalho));
 
     lerCabecalho(arq, cabAux);
-    printf("%d", cabAux->proxRRN);
     int i = 0;
     // percorre todo o arquivo
     while(i < cabAux->proxRRN || i < 10){
