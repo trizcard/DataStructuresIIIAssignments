@@ -21,9 +21,9 @@ struct registro{
     char removido[1];
     int encadeamento;
     int idConecta;
-    char siglaPais[3];
+    char *siglaPais;
     int idPoPsConec;
-    char undMedida[2];
+    char *undMedida;
     int veloc;
 
     char *nomePoPs;
@@ -36,3 +36,9 @@ struct filtro{
     char valorCampo[25];
 };
 typedef struct filtro filtro;
+
+struct ldedRegistros{
+    registro *reg;
+    struct ldedRegistros *prox;
+};
+typedef struct ldedRegistros ldedRegistros;

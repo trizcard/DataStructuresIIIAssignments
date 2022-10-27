@@ -22,3 +22,9 @@ void imprimirSaida(FILE *arq);
 int analisarCampo(filtro *filtros, int i, registro *reg);
 
 void filtrar(FILE *arq, int tipo);
+
+void adicionarListaReg(ldedRegistros *lista, registro *regAux);
+
+void imprimirListaReg(ldedRegistros *lista);
+
+void freeListaReg(ldedRegistros *lista);
