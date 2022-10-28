@@ -3,6 +3,7 @@
 #include <string.h>
 #include "cabecalho.h"
 #include "funcFornecidas.h"
+#include "listaEncad.h"
 #define LIXO '$'
 
 void addLixo(char *lixo, int inicio, int tam);
@@ -23,8 +24,12 @@ int analisarCampo(filtro *filtros, int i, registro *reg);
 
 void filtrar(FILE *arq, int tipo);
 
-void adicionarListaReg(ldedRegistros *lista, registro *regAux);
+Lista* cria_listaReg();
 
-void imprimirListaReg(ldedRegistros *lista);
+void libera_lista(Lista* li);
 
-void freeListaReg(ldedRegistros *lista);
+void adicionarListaReg(Lista *lista, registro *regOrig);
+
+void imprimirListaReg(Lista *lista);
+
+void passarReg(registro *reg, registro *regOrig);

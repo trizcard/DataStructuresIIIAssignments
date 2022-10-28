@@ -94,18 +94,13 @@ void imprimeRegistro(registro *regAux){
 void removerRegistro(FILE *arq, cabecalho *cab){
     fseek(arq, -64, SEEK_CUR);
     long posicao;
-    int nulo = 0;
     posicao = ftell(arq);
+
     fwrite("1", sizeof(char), 1, arq);
     fwrite(&cab->topo, sizeof(int), 1, arq);
-    fwrite(&nulo, sizeof(int), 1, arq);
-    fwrite("$$", sizeof(char), 2, arq);
-    fwrite(&nulo, sizeof(int), 1, arq);
-    fwrite("$", sizeof(char), 1, arq);
-    fwrite(&nulo, sizeof(int), 1, arq);
-    fwrite("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", sizeof(char), 44, arq);
-    cab->topo = posicao;
-    cab->nRegRemov++;
+    fwrite("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", sizeof(char), 59, arq);
+    cab->topo = (posicao-960)/64;
+    cab->nRegRemov++; 
 }
 
 void imprimirSaida(FILE *arq){
@@ -139,6 +134,9 @@ void imprimirSaida(FILE *arq){
         i++;
     }
     printf("Numero de paginas de disco: %d\n\n", cabAux->nPagDisco);
+
+    free(regAux->siglaPais);
+    free(regAux->undMedida);
     free(regAux->nomePoPs);
     free(regAux->nomePais);
     free(regAux);
@@ -192,15 +190,17 @@ int analisarCampo(filtro *filtros, int i, registro *reg){
 void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
     int n;
     scanf("%d", &n);
-    int filtrado = 0; // se for 1, o registro passou pelos filtros
     
     filtro filtros[n];
-    ldedRegistros **regFiltrados;
-    regFiltrados = (ldedRegistros**) malloc(n * sizeof(ldedRegistros*));
+
+    // uma lista de registros para cada um dos filtros
+    Lista **regFiltrados;
+    regFiltrados = (Lista**) malloc(n * sizeof(Lista*));
 
     for(int i = 0; i < n; i++){
         fscanf(stdin, "%s", filtros[i].nomeCampo);
         scan_quote_string(filtros[i].valorCampo);
+        regFiltrados[i] = (Lista*) malloc(sizeof(Lista));
     }
     
     // cria um registro auxiliar
@@ -222,32 +222,29 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
 
     // percorre todo o arquivo
     while(regRRN < cab->proxRRN){
-
         // se registro removido retorna 0
         if (lerRegistro(arq, regAux)){
             for (int i = 0; i < n; i++){
+                int filtrado = 0; // se for 1, o registro passou pelos filtros
                 filtrado = analisarCampo(filtros, i, regAux);
 
                 if (filtrado && tipo == 3){
                     adicionarListaReg((regFiltrados[i]), regAux);
-                    filtrado = 0;
                 }else if (tipo == 4 && filtrado){
                     removerRegistro(arq, cab);
-                    filtrado = 0;
                     break;
                 }
             }
-            regAux = (registro*) malloc(sizeof(registro));
-            regAux->nomePoPs = (char *) malloc(45*sizeof(char));
-            regAux->nomePais = (char *) malloc(45*sizeof(char));
         }
         regRRN++;
     }
+
     for (int i = 0; i < n; i++){
         if (tipo == 3){
             printf("Busca %d\n", (i+1));
             imprimirListaReg((regFiltrados[i]));
             printf("Numero de paginas de disco: %d\n\n", cab->nPagDisco);
+            libera_lista((regFiltrados[i]));
         }
     }
 
@@ -267,44 +264,24 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
     free(cab);
 }
 
+void passarReg(registro *reg, registro *regOrig){
+    reg->idConecta = regOrig->idConecta;
 
-// implementar lista dinamica encadeada de registros
-void adicionarListaReg(ldedRegistros *lista, registro *reg){
-    ldedRegistros *novo;
-    novo = (ldedRegistros*) malloc(sizeof(ldedRegistros));
-    novo->reg = reg;
-    novo->prox = NULL;
+    reg->siglaPais = malloc(3 * sizeof(char));
+    reg->siglaPais[0] = regOrig->siglaPais[0];
+    reg->siglaPais[1] = regOrig->siglaPais[1];
+    reg->siglaPais[2] = '\0';
 
-    if (lista == NULL){
-        lista = novo;
-    } else {
-        ldedRegistros *aux;
-        aux = lista;
-        while(aux->prox != NULL){
-            aux = aux->prox;
-        }
-        aux->prox = novo;
-    }
-}
+    reg->idPoPsConec = regOrig->idPoPsConec;
+    
+    reg->undMedida = malloc(2 * sizeof(char));
+    reg->undMedida[0] = regOrig->undMedida[0];
+    reg->undMedida[1] = '\0';
 
-void imprimirListaReg(ldedRegistros *lista){
-    ldedRegistros *aux;
-    aux = lista;
-    while(aux != NULL){
-        imprimeRegistro(aux->reg);
-        aux = aux->prox;
-    }
-    freeListaReg(lista);
-}
+    reg->veloc = regOrig->veloc;
 
-void freeListaReg(ldedRegistros *lista){
-    ldedRegistros *aux;
-    while(lista != NULL){
-        aux = lista;
-        free(aux->reg->nomePoPs);
-        free(aux->reg->nomePais);
-        free(aux->reg);
-        lista = lista->prox;
-        free(aux);
-    }
+    reg->nomePais = malloc(strlen(regOrig->nomePais) * sizeof(char));
+    strcpy(reg->nomePais, regOrig->nomePais);
+    reg->nomePoPs = malloc(strlen(regOrig->nomePoPs) * sizeof(char));
+    strcpy(reg->nomePoPs, regOrig->nomePoPs);
 }

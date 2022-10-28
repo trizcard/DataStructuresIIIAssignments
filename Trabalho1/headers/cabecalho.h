@@ -37,8 +37,10 @@ struct filtro{
 };
 typedef struct filtro filtro;
 
-struct ldedRegistros{
+struct elemento{
     registro *reg;
-    struct ldedRegistros *prox;
+    struct elemento *prox;
 };
-typedef struct ldedRegistros ldedRegistros;
+typedef struct elemento elemento;
+
+typedef struct elemento* Lista;
