@@ -304,7 +304,9 @@ void adicionarListaReg(Lista *lista, registro *regOrig){
 void imprimirListaReg(Lista *lista){
     elemento *aux;
     aux = *lista;
-    
+    if (aux == NULL){
+        printf("Registro inexistente.\n\n");
+    }
     while(aux != NULL){
         imprimeRegistro(aux->reg);
         aux = aux->prox;

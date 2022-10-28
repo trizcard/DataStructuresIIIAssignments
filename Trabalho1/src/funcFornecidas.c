@@ -58,7 +58,13 @@ void scan_quote_string(char *str) {
 		getchar(); // ignorar aspas fechando
 	} else if(R != EOF){ // vc tá tentando ler uma string que não tá entre aspas! Fazer leitura normal %s então, pois deve ser algum inteiro ou algo assim...
 		str[0] = R;
-		scanf("%s", &str[1]);
+		R = getchar();
+		int i = 1;
+		while(!isspace(R) && R != EOF){
+			str[i] = R;
+			R = getchar();
+			i++;
+		}
 	} else { // EOF
 		strcpy(str, "");
 	}
