@@ -3,7 +3,6 @@
 #include <string.h>
 #include "cabecalho.h"
 #include "funcFornecidas.h"
-#include "listaEncad.h"
 #define LIXO '$'
 
 void addLixo(char *lixo, int inicio, int tam);

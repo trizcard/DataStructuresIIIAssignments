@@ -3,7 +3,6 @@
 #include <string.h>
 #include "funcFornecidas.h"
 #include "funcAuxiliares.h"
-#include "listaEncad.h"
 #define LIXO '$'
 
 void funcUM(char nomeArq[25]);
