@@ -1,5 +1,4 @@
 #include "funcAuxiliares.h"
-// 2 topologiaRede.bin
 
 void addLixo(char *lixo, int inicio, int tam){
     for (int i = inicio; i < (inicio + tam); i++){
@@ -7,281 +6,211 @@ void addLixo(char *lixo, int inicio, int tam){
     }
 }
 
-void lerCampoVar(char *string, char *strPoPs, char *strPais){
-    char c = 0;
+// Atualiza cabeçalho a quantidade de compactações
+void atualizarQuantidadeCompactada(FILE* arqSaida){
+    int quantidadeCompactada = pegarQuantidadeCompactada(arqSaida);
+    quantidadeCompactada++;
+    fseek(arqSaida, 17, SEEK_SET);
+    fwrite(&quantidadeCompactada, sizeof(int), 1, arqSaida);
+}	
+
+// Le a quantidade de compactações do arquivo
+int pegarQuantidadeCompactada(FILE *arq){
+    int qtdCompactada;
+    fseek(arq, 17, SEEK_SET);
+    fread(&qtdCompactada, sizeof(int), 1, arq);
+    return qtdCompactada;
+}
+
+// Função de quebrar a string do csv
+void quebrarString(char *linha, registro *reg){
+    // São 7 campos, ent  6 virgulas   
     int i = 0;
-    if (string[0] != '|'){
-        do{
-            c = string[i];
-            strPoPs[i] = c;
-            i++;
-        } while(string[i] != '|' && i < 44);
-    }
-    strPoPs[i] = '\0';
-    i++;
-    int j = i;
+    int qtdVirgulas = 0;
     
-    if (i < 44){
-        c = string[i];
-        while(c != '|' && i < 44){
-            strPais[(i-j)] = c;
-            i++;
-            c = string[i];
-        }
-    }
-    strPais[i-j] = '\0';
-}
-
-void lerCabecalho(FILE *arq, cabecalho *cab){
-    fread(cab->status, sizeof(char), 1, arq);
-    fread(&cab->topo, sizeof(int), 1, arq);
-    fread(&cab->proxRRN, sizeof(int), 1, arq);
-    fread(&cab->nRegRemov, sizeof(int), 1, arq);
-    fread(&cab->nPagDisco, sizeof(int), 1, arq);
-    fread(&cab->qtdCompact, sizeof(int), 1, arq);
-    fread(cab->lixo, sizeof(char), 939, arq);
-}
-
-int lerRegistro(FILE *arq, registro *reg){
-
-    fread(reg->removido, sizeof(char), 1, arq);
-    if (reg->removido[0] == '1'){
-        fseek(arq, 63, SEEK_CUR);
-        return 0;
-    }
-
-    fread(&reg->encadeamento, sizeof(int), 1, arq);
-    fread(&reg->idConecta, sizeof(int), 1, arq);
-    reg->siglaPais = malloc(3 * sizeof(char));
-    fread((reg->siglaPais), sizeof(char), 2, arq);
-    reg->siglaPais[2] = '\0';
-    fread(&reg->idPoPsConec, sizeof(int), 1, arq);
-    reg->undMedida = malloc(2 * sizeof(char));
-    fread((reg->undMedida), sizeof(char), 1, arq);
-    reg->undMedida[1] = '\0';
-    fread(&reg->veloc, sizeof(int), 1, arq);
-    
-    char string[45];
-    fread(string, sizeof(char), 44, arq);
-    
-    lerCampoVar(string, reg->nomePoPs, reg->nomePais);
-
-    return 1;
-}
-
-void imprimeRegistro(registro *regAux){
-    if (regAux->idConecta != 0){
-        printf("Identificador do ponto: %d\n", regAux->idConecta);
-    }
-    if (regAux->nomePoPs[0] != '\0'){
-        printf("Nome do ponto: %s\n", regAux->nomePoPs);
-    }
-    if (regAux->nomePais[0] != '\0'){
-        printf("Pais de localizacao: %s\n", regAux->nomePais);
-    }
-    if (regAux->siglaPais[0] != '$'){
-        printf("Sigla do pais: %s\n", regAux->siglaPais);
-    }
-    if (regAux->idPoPsConec != -1){
-        printf("Identificador do ponto conectado: %d\n", regAux->idPoPsConec);
-    }
-    if (regAux->undMedida[0] != '$'){
-        printf("Velocidade de transmissao: %d %sbps\n", regAux->veloc, regAux->undMedida);
-    }
-    printf("\n");
-}
-
-void removerRegistro(FILE *arq, cabecalho *cab){
-    fseek(arq, -64, SEEK_CUR);
-    long posicao;
-    posicao = ftell(arq);
-
-    fwrite("1", sizeof(char), 1, arq);
-    fwrite(&cab->topo, sizeof(int), 1, arq);
-    fwrite("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", sizeof(char), 59, arq);
-    cab->topo = (posicao-960)/64;
-    cab->nRegRemov++; 
-}
-
-void imprimirSaida(FILE *arq){
-    // cria um registro auxiliar e cabecalho auxiliar
-    registro *regAux;
-    regAux = (registro*) malloc(sizeof(registro));
-    regAux->nomePoPs = (char *) malloc(45*sizeof(char));
-    regAux->nomePais = (char *) malloc(45*sizeof(char));
-    cabecalho *cabAux;
-    cabAux = (cabecalho*) malloc(sizeof(cabecalho));
-
-    lerCabecalho(arq, cabAux);
-
-    if (cabAux->status[0] == '0'){
-        printf("Falha no processamento do arquivo.\n");
-        return;
-    }
-    
-    int i = 0;
-
-    if (i == cabAux->proxRRN){
-        printf("Registro inexistente.\n\n");
-    }
-    
-    // percorre todo o arquivo
-    while(i < cabAux->proxRRN){
-        // se registro removido retorna 0
-        if (lerRegistro(arq, regAux)){
-            imprimeRegistro(regAux);
+    //Percorrer a string linha toda
+    while(linha[i] != '\n'){
+        if(qtdVirgulas == 0){
+            //string auxiliar para guardar o idConecta
+            char *idConecta = (char*) malloc(10 * sizeof(char));
+            percorrerCampo(&reg->idConecta, &i, linha, idConecta, 1);
+            free(idConecta);
+            qtdVirgulas++;
+        } else if(qtdVirgulas == 1){//Percorrer o campo nomePoPs
+            //string auxiliar para guardar o nomePoPs
+            char *nomePoPs = (char*) malloc(44 * sizeof(char));
+            percorrerCampo(reg->nomePoPs, &i, linha, nomePoPs, 0);
+            free(nomePoPs);
+            qtdVirgulas++;
+        }else if(qtdVirgulas == 2){
+            //String auxiliar para guardar o nomePais
+            char *nomePais = (char*) malloc(44 * sizeof(char));
+            percorrerCampo(reg->nomePais, &i, linha, nomePais, 0);
+            free(nomePais);
+            qtdVirgulas++;         
+        }else if(qtdVirgulas == 3){
+            //string auxiliar para guardar o siglaPais
+            char *siglaPais = (char*) malloc(3 * sizeof(char));
+            percorrerCampo(reg->siglaPais, &i, linha, siglaPais, 0);
+            free(siglaPais);
+            verificarCampoString(reg->siglaPais, 2, 0);
+            qtdVirgulas++;
+        }else if(qtdVirgulas == 4){
+            // String auxiliar para guardar o idPoPsConec
+            char *idPoPsConec = (char*) malloc(10 * sizeof(char));
+            percorrerCampo(&reg->idPoPsConec, &i, linha, idPoPsConec, 1);
+            free(idPoPsConec);
+            qtdVirgulas++; 
+        }else if(qtdVirgulas == 5){
+            //String auxiliar para guardar o undMedida
+            char *undMedida = (char*) malloc(2 * sizeof(char));
+            percorrerCampo(reg->undMedida, &i, linha, undMedida, 0);
+            free(undMedida);
+            verificarCampoString(reg->undMedida, 1, 0);
+            qtdVirgulas++;         
+        }else if(qtdVirgulas == 6){
+            //string auxiliar para guardar a veloc
+            char *veloc = (char*) malloc(10 * sizeof(char));
+            percorrerCampo(&reg->veloc, &i, linha, veloc, 1);
+            free(veloc);
+            qtdVirgulas++;
         }
         i++;
-    }
-    printf("Numero de paginas de disco: %d\n\n", cabAux->nPagDisco);
-
-    free(regAux->siglaPais);
-    free(regAux->undMedida);
-    free(regAux->nomePoPs);
-    free(regAux->nomePais);
-    free(regAux);
-    free(cabAux);
+    }  
 }
 
-int analisarCampo(filtro *filtros, int i, registro *reg){
-    if (!strcmp(filtros[i].nomeCampo, "idConecta")){
-        int idConecta = atoi(filtros[i].valorCampo);
-        if (idConecta == reg->idConecta){
-            return 1;
-        }
-        return 0;
-    } else if (!strcmp(filtros[i].nomeCampo, "siglaPais")){
-        if (!strcmp(filtros[i].valorCampo, reg->siglaPais)){
-            return 1;
-        }
-        return 0;
-    } else if (!strcmp(filtros[i].nomeCampo, "idPoPsConectado")){
-        int idPoPsConectado = atoi(filtros[i].valorCampo);
-        if (idPoPsConectado == reg->idPoPsConec){
-            return 1;
-        }
-        return 0;
-    } else if (!strcmp(filtros[i].nomeCampo, "unidadeMedida")){
-        if (!strcmp(filtros[i].valorCampo, reg->undMedida)){
-            return 1;
-        }
-        return 0;
-    } else if (!strcmp(filtros[i].nomeCampo, "velocidade")){
-        int velocidade = atoi(filtros[i].valorCampo);
-        if (velocidade == reg->veloc){
-            return 1;
-        }
-        return 0;
-    } else if (!strcmp(filtros[i].nomeCampo, "nomePoPs")){
-        if (!strcmp(filtros[i].valorCampo, reg->nomePoPs)){
-            return 1;
-        }
-        return 0;
-    } else if (!strcmp(filtros[i].nomeCampo, "nomePais")){
-        if (!strcmp(filtros[i].valorCampo, reg->nomePais)){
-            return 1;
-        }
-        return 0;
-    } else {
-        return 0;
+// Verificar se o campo de tamanho fixo existe e adicionar o lixo caso não tenha sido preenchido
+void verificarCampoString(char *campo, int tam, int inicio){
+    if (!strcmp(campo, "")){
+        addLixo(campo, inicio, tam);
+    }   
+}
+
+// Função que adiciona o campo de tamanho variável no arquivo de saída
+void adicionarCampoVariavel(FILE *arqSaida, char *campo){
+    if(strcmp(campo, "")){
+        fwrite(campo, sizeof(char) , strlen(campo), arqSaida);
+    }
+    fwrite("|", sizeof(char), 1, arqSaida);
+}
+
+// Função que adiciona o valor do campo Int no registro
+void addValorInt(int *set, int flag, char *valor){
+    if(flag){
+        *set = atoi(valor);
+    }else{
+        *set = -1;
     }
 }
 
-void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
-    int n;
-    scanf("%d", &n);
+// Função que adiciona o valor do campo String no registro
+void addValorString(char *set, int flag, char* valor){
+    if(flag){
+        strcpy(set, valor);
+    }else{
+        strcpy(set, "");
+    }
+}
+
+// Percorrer campo da linha registro de entrada e adicionar no registro
+void percorrerCampo(void *campo, int *posi, char *linha, char *varAux, int inteiro){
+    int j = 0;
+            
+    //Flag para saber se tem valor setado no campo
+    int flag=0;
+
+    //Percorre o campo, até encontrar o separador
+    while(linha[*posi] != ',' && linha[*posi] != '\0'){
+        varAux[j] = linha[*posi];
+        if(!flag){
+        flag = 1;
+        }
+        *posi += 1;
+        j++;
+    }
+
+    if(varAux[j-1] == ' '){
+        varAux[j-1] = '\0';
+    }else{
+        varAux[j] = '\0';
+    }
+
+    //Se tem valor, converter para inteiro e adicionar no registro
+    if(inteiro){
+        addValorInt(campo, flag, varAux);
+    }else{
+        addValorString(campo, flag, varAux);
+    }
+}
+
+// Função que pega a entrada de Registro
+void entradaRegistro(registro *reg){
+    //Pegar o idConecta
+    char *idConecta = (char*) malloc(10 * sizeof(char));
+    scanf("%s ",idConecta );
+    verificaCampoNulo(idConecta, &reg->idConecta,1);
+    free(idConecta);
+
+    //Pegar o nomePais
+    scan_quote_string(reg->nomePais);
+    verificaCampoNulo(reg->nomePais, reg->nomePais, 0);
+
+    //Pegar o nomePoPs
+    scan_quote_string(reg->nomePoPs);
+    verificaCampoNulo(reg->nomePoPs, &reg->nomePoPs, 0);
+
+    //Pegar a siglaPais
+    scan_quote_string(reg->siglaPais);
+    verificaCampoNulo(reg->siglaPais,&reg->siglaPais, 0);
+
+    //Pegar o idPoPsConec
+    char *idPoPsConec = (char*) malloc(10 * sizeof(char));
+    scanf("%s ", idPoPsConec);
+    verificaCampoNulo(idPoPsConec, &reg->idPoPsConec,1);
+    free(idPoPsConec);
+
+    //Pegar a undMedida
+    scan_quote_string(reg->undMedida);
+    verificaCampoNulo(reg->undMedida, &reg->undMedida, 0);
+
+    //Pegar a veloc
+    char *veloc = (char*) malloc(10 * sizeof(char));
+    scanf("%s", veloc);
+    verificaCampoNulo(veloc, &reg->veloc,1);
+    free(veloc);
+}
+
+// Função que adiciona o registro no arquivo de saída
+void adicionarRegArqSaida(FILE *arqSaida, registro *reg){
+    //Adicionar os campos no registro
+    //Campos tamanho fixo
+    fwrite(&reg->removido, sizeof(char), 1, arqSaida);
+    fwrite(&reg->encadeamento, sizeof (int), 1, arqSaida);
+    fwrite(&reg->idConecta, sizeof (int), 1, arqSaida);
+    fwrite(reg->siglaPais, sizeof (char), 2, arqSaida);
+    fwrite(&reg->idPoPsConec, sizeof (int), 1, arqSaida);
+    fwrite(reg->undMedida, sizeof(char), 1, arqSaida);
+    fwrite(&reg->veloc, sizeof (int), 1, arqSaida);
     
-    filtro filtros[n];
+    //Campos tamanho variavel
+    adicionarCampoVariavel(arqSaida, reg->nomePoPs);
+    adicionarCampoVariavel(arqSaida, reg->nomePais);
 
-    // uma lista de registros para cada um dos filtros
-    Lista **regFiltrados;
-    regFiltrados = (Lista**) malloc(n * sizeof(Lista*));
-
-    for(int i = 0; i < n; i++){
-        fscanf(stdin, "%s", filtros[i].nomeCampo);
-        scan_quote_string(filtros[i].valorCampo);
-        regFiltrados[i] = (Lista*) malloc(sizeof(Lista));
-    }
-    
-    // cria um registro auxiliar
-    registro *regAux;
-    regAux = (registro*) malloc(sizeof(registro));
-    regAux->nomePoPs = (char*) malloc(45*sizeof(char));
-    regAux->nomePais = (char*) malloc(45*sizeof(char));
-
-    // cria e le cabecalho
-    cabecalho *cab;
-    cab = (cabecalho*) malloc(sizeof(cabecalho));
-    lerCabecalho(arq, cab);
-    if (cab->status[0] == '0'){
-        printf("Falha no processamento do arquivo.\n");
-        return;
-    }
-
-    int regRRN = 0;
-
-    // percorre todo o arquivo
-    while(regRRN < cab->proxRRN){
-        // se registro removido retorna 0
-        if (lerRegistro(arq, regAux)){
-            for (int i = 0; i < n; i++){
-                int filtrado = 0; // se for 1, o registro passou pelos filtros
-                filtrado = analisarCampo(filtros, i, regAux);
-
-                if (filtrado && tipo == 3){
-                    adicionarListaReg((regFiltrados[i]), regAux);
-                }else if (tipo == 4 && filtrado){
-                    removerRegistro(arq, cab);
-                    break;
-                }
-            }
-        }
-        regRRN++;
-    }
-
-    for (int i = 0; i < n; i++){
-        if (tipo == 3){
-            printf("Busca %d\n", (i+1));
-            imprimirListaReg((regFiltrados[i]));
-            printf("Numero de paginas de disco: %d\n\n", cab->nPagDisco);
-            libera_lista((regFiltrados[i]));
-        }
-    }
-
-    if (tipo == 4){
-        // atualiza cabecalho
-        fseek(arq, 1, SEEK_SET);
-        fwrite(&(cab->topo), sizeof(int), 1, arq);
-        fseek(arq, 9, SEEK_SET);
-        fwrite(&cab->nRegRemov, sizeof(int), 1, arq);
-    }
-
-    
-    free(regAux->nomePoPs);
-    free(regAux->nomePais);
-    free(regAux);
-    free(regFiltrados);
-    free(cab);
+    //Adicionar lixo no restante da página de disco
+    int qtdLixoFinal = 64 - (strlen(reg->nomePoPs) + strlen(reg->nomePais) + 22);
+    char *lixo = malloc(qtdLixoFinal * sizeof(char));
+    addLixo(lixo, 0, qtdLixoFinal);
+    fwrite(lixo, sizeof(char) , qtdLixoFinal, arqSaida);
+    free(lixo);
 }
 
-void libera_lista(Lista* li){
-    if(li != NULL){
-        elemento* no;
-        while((*li) != NULL){
-            no = *li;
-            *li = (*li)->prox;
-            free(no->reg->nomePais);
-            free(no->reg->nomePoPs);
-            free(no->reg->undMedida);
-            free(no->reg->siglaPais);
-            free(no->reg);
-            free(no);
-        }
-        free(li);
-    }
+void adicionarLixoCampFixo(registro *reg){
+    //Verificar se o campo é nulo
+    verificarCampoString(reg->siglaPais, 2, 0);
+    verificarCampoString(reg->undMedida, 1, 0);
 }
 
-// implementar lista dinamica encadeada de registros
+// Implementar lista dinamica encadeada de registros
 void adicionarListaReg(Lista *lista, registro *regOrig){
     elemento *novo;
     novo = (elemento*) malloc(sizeof(elemento));
@@ -301,18 +230,25 @@ void adicionarListaReg(Lista *lista, registro *regOrig){
     }
 }
 
-void imprimirListaReg(Lista *lista){
-    elemento *aux;
-    aux = *lista;
-    if (aux == NULL){
-        printf("Registro inexistente.\n\n");
-    }
-    while(aux != NULL){
-        imprimeRegistro(aux->reg);
-        aux = aux->prox;
+// Desaloca a lista dinamica encadeada de registros
+void libera_lista(Lista* li){
+    if(li != NULL){
+        elemento* no;
+        while((*li) != NULL){
+            no = *li;
+            *li = (*li)->prox;
+            free(no->reg->nomePais);
+            free(no->reg->nomePoPs);
+            free(no->reg->undMedida);
+            free(no->reg->siglaPais);
+            free(no->reg);
+            free(no);
+        }
+        free(li);
     }
 }
 
+// Passa as informações do registro origem para o registro destino
 void passarReg(registro *reg, registro *regOrig){
     reg->idConecta = regOrig->idConecta;
 
@@ -333,4 +269,92 @@ void passarReg(registro *reg, registro *regOrig){
     strcpy(reg->nomePais, regOrig->nomePais);
     reg->nomePoPs = malloc(strlen(regOrig->nomePoPs) * sizeof(char));
     strcpy(reg->nomePoPs, regOrig->nomePoPs);
+}
+
+// Verifica se o campo de inteiro é nulo, caso que 
+void converterInt(int *campo, int flagNulo, char *valor){
+    if(flagNulo){
+        *campo = -1;
+    }else{
+        *campo = atoi(valor);
+    }
+}
+
+// Função que verifica se entrada é nula
+void verificaCampoNulo(char* campo, void *campoReg, int flagInt){
+    if(!strcmp(campo, "NULO")){
+        if(flagInt == 1){
+            converterInt(campoReg, 1, NULL);
+        }else{
+            strcpy(campoReg, "");
+        }
+    }else{
+        if(flagInt == 1){
+            converterInt(campoReg, 0, campo);
+        }
+    }
+}
+
+//Verificar se tem algum registro removido no arquivo, pega o topo
+int verificarRemovido(FILE* arqSaida){
+    int removido;
+    fseek(arqSaida, 1, SEEK_SET);
+    fread (&removido, sizeof(int), 1, arqSaida);
+    return removido;
+}
+
+// Função que atualiza o nro de registro Removidos
+void atualizarNroRegRemovidos(FILE* arqSaida){
+    //Pegar o numero de registros removidos e decrementar 1
+    int regRemovidos = pegarNroRegRemovidos(arqSaida);
+    regRemovidos--;
+    //Atualizar o numero de registros removidos
+    fseek(arqSaida,9, SEEK_SET);
+    fwrite(&regRemovidos, sizeof(int), 1, arqSaida);
+}
+
+// Função atualiza o encademaneto do topo da pilha
+void atualizarTopo(FILE* arqSaida, int RRN){
+    fseek(arqSaida, 1, SEEK_SET);
+    fwrite(&RRN, sizeof(int), 1, arqSaida);
+}
+
+// Função que atualiza o RRN do próximo registro
+void atualizarRRN(FILE* arqSaida, int RRN){
+    int proxRRN = RRN+1;
+    fseek(arqSaida, 5, SEEK_SET);
+    fwrite(&proxRRN, sizeof(int), 1, arqSaida);
+}
+
+// Função que atuliza o nroPagDisco
+void atualizarNroPagDisco(FILE* arqSaida, int RRN){
+    float qtdRegPag = 960/64;
+    float nroPagDisco = (RRN/qtdRegPag)+1;
+    int nroPagDiscoInt = ceil(nroPagDisco); 
+    fseek(arqSaida, 13, SEEK_SET);
+    fwrite(&nroPagDiscoInt, sizeof(int), 1, arqSaida);
+}
+
+// Pega o numero de registros removidos
+int pegarNroRegRemovidos(FILE* arqSaida){
+    int nroRegRemovidos;
+    fseek(arqSaida, 9, SEEK_SET);
+    fread(&nroRegRemovidos, sizeof(int), 1, arqSaida);
+    return nroRegRemovidos;
+}
+
+//Pega o RRN do próximo registro removido
+int pegarRRNencadeado(FILE* arqSaida, int RRN){
+    int encadeamento;
+    fseek(arqSaida, (1 +(960 + (RRN * 64))), SEEK_SET);
+    fread(&encadeamento, sizeof(int), 1, arqSaida);
+    return encadeamento;
+}
+
+// Pega o RRN do próximo registro
+int pegarRRN(FILE* arqSaida){
+    int RRN;
+    fseek(arqSaida, 5, SEEK_SET);
+    fread(&RRN, sizeof(int), 1, arqSaida);
+    return RRN;
 }

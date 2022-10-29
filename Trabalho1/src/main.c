@@ -11,7 +11,9 @@ int main() {
     // chama a funcao a ser executada
     switch (func) {
         case 1:
-            funcUM(nomeArq);
+            char nomeArq2[25];
+            fscanf(stdin, "%s", nomeArq2); // nome do arquivo
+            funcUM(nomeArq, nomeArq2);
             break;
         
         case 2:
@@ -27,7 +29,9 @@ int main() {
             break;
 
         case 5:
-            funcCINCO(nomeArq);
+            int n;
+            scanf("%d", &n);
+            funcCINCO(nomeArq, n);
             break;
         
         case 6:

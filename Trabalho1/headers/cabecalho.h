@@ -4,15 +4,14 @@
 #define LIXO '$'
 
 struct cabecalho{
-    char status[1];
+    char status;
     int topo;
     int proxRRN;
     int nRegRemov;
     int nPagDisco;
     int qtdCompact;
-    char lixo[939];
+    char *lixo;
 
-    struct pagDisco *prox;
 };
 typedef struct cabecalho cabecalho;
 
