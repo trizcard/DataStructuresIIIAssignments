@@ -47,10 +47,10 @@ void lerCabecalho(FILE *arq, cabecalho *cab){
 void inicializarRegistro(registro *reg){
     reg->removido[0] = '0';
     reg->encadeamento = -1;
-    reg->nomePais = malloc(44 * sizeof(char));
-    reg->nomePoPs = malloc(44 * sizeof(char));
-    reg->siglaPais = malloc(3 * sizeof(char));
-    reg->undMedida = malloc(2 * sizeof(char));
+    reg->nomePais = (char *) malloc(45 * sizeof(char));
+    reg->nomePoPs = (char *) malloc(45 * sizeof(char));
+    reg->siglaPais = (char *) malloc(3 * sizeof(char));
+    reg->undMedida = (char *) malloc(2 * sizeof(char));
     reg->veloc = -1;
 }
 
@@ -198,10 +198,7 @@ void imprimirSaida(FILE *arq){
     }
     printf("Numero de paginas de disco: %d\n\n", cabAux->nPagDisco);
 
-    free(regAux->siglaPais);
-    free(regAux->undMedida);
-    free(regAux->nomePoPs);
-    free(regAux->nomePais);
+    desalocarRegistro(regAux);
     free(regAux);
     free(cabAux->lixo);
     free(cabAux);

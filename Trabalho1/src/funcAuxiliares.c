@@ -148,7 +148,7 @@ void entradaRegistro(registro *reg){
     //Pegar o idConecta
     char *idConecta = (char*) malloc(10 * sizeof(char));
     scanf("%s ",idConecta );
-    verificaCampoNulo(idConecta, &reg->idConecta,1);
+    verificaCampoNulo(idConecta, &reg->idConecta, 1);
     free(idConecta);
 
     //Pegar o nomePais

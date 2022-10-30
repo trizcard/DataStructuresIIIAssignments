@@ -131,7 +131,7 @@ void funcCINCO(char nomeArq[25], int n){
     }
 
     //Entrada de n registros
-    for(int i =0; i<n; i++){
+    for(int i = 0; i < n; i++){
         //criar o registro
         registro reg;
 
@@ -143,7 +143,6 @@ void funcCINCO(char nomeArq[25], int n){
 
         //Adicionar lixo nos campo de tamanho fixo que não foram preenchidos
         adicionarLixoCampFixo(&reg);
-        
 
         //Verificar se tem algum registro removido no arquivo, pega o topo
         int RRN = verificarRemovido(arqEntrada);
@@ -163,8 +162,9 @@ void funcCINCO(char nomeArq[25], int n){
             //Atualizar o nroRegRemovido
             atualizarNroRegRemovidos(arqEntrada);
         
-        }else{//Se não tiver, adicionar o registro no final do arquivo
-            RRN =  pegarRRN(arqEntrada);
+        }else{ //Se não tiver, adicionar o registro no final do arquivo
+            RRN = pegarRRN(arqEntrada);
+            
             fseek(arqEntrada, (960 + (RRN * 64)), SEEK_SET);
             adicionarRegArqSaida(arqEntrada, &reg);
 
@@ -195,9 +195,21 @@ void funcSEIS(char nomeArq[25]){
         return;
     }
 
-    
-    
-    //Verificar se há registros removidos
+    // verifica inconsistencias no arquivo
+    char status;
+    fread(&status, sizeof(char), 1, arqEntrada);
+    if(status == '0'){
+        printf("Falha no processamento do arquivo.\n");
+        fclose(arqEntrada);
+        return;
+    }
+
+    // verificar quatidade de RRN no arquivo de entrada
+    fseek(arqEntrada, 5, SEEK_SET);
+    int qtdRRN;
+    fread(&qtdRRN, sizeof(int), 1, arqEntrada);
+
+    // Verificar se há registros removidos
     int nroRegRemovidos = pegarNroRegRemovidos(arqEntrada);
 
     if (nroRegRemovidos != 0){//Se tiver, remover os registros removidos
@@ -217,16 +229,18 @@ void funcSEIS(char nomeArq[25]){
         adicionarCabecalhoArq(arqSaida, &cab);
 
         //Variavel Contabilizar pagDisco
-        int qtdByte= 0;
+        int qtdByte = 0;
         cab.nPagDisco++;
 
-        //variável para contabilizar RRN
+        //variável para contabilizar RRN e variavel do RRN atual do arquivo de entrada
         int RRN = 0;
+        int RRNatual = 0;
 
         //Pular o cabeçalho para percorrer o arquivo
         fseek(arqEntrada, 960, SEEK_SET);
+
         //Percorrer os registros e ir adicionando no arquivo de saida
-        while(!feof(arqEntrada)){
+        while(RRNatual < qtdRRN){
             //criar o registro
             registro reg;
 
@@ -234,7 +248,7 @@ void funcSEIS(char nomeArq[25]){
             inicializarRegistro(&reg);
 
             //Pegar o registro do arquivo de entrada
-            if(lerRegistro(arqEntrada, &reg) ){
+            if(lerRegistro(arqEntrada, &reg)){
                 //Verificar se o registro cabe na pagina de disco
                 if(qtdByte + 64 > TAMANHO_REG){
                     cab.nPagDisco++;
@@ -246,13 +260,12 @@ void funcSEIS(char nomeArq[25]){
                 //Adicionar o registro no arquivo de saida
                 adicionarRegArqSaida(arqSaida,&reg);
                 RRN++;
-
-                //Desalocar variaveis   
-                desalocarRegistro(&reg);  
-
             }
 
-            
+            //Desalocar variaveis   
+            desalocarRegistro(&reg);
+
+            RRNatual++;
         }
        
 
@@ -263,8 +276,6 @@ void funcSEIS(char nomeArq[25]){
 
         //Desalocarlixo cab
         free(cab.lixo);
-
-        
         
         //fechar o arquivo
         fclose(arqEntrada);
