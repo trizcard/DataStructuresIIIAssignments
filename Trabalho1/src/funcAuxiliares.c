@@ -252,22 +252,22 @@ void libera_lista(Lista* li){
 void passarReg(registro *reg, registro *regOrig){
     reg->idConecta = regOrig->idConecta;
 
-    reg->siglaPais = malloc(3 * sizeof(char));
+    reg->siglaPais = (char*) malloc(3 * sizeof(char));
     reg->siglaPais[0] = regOrig->siglaPais[0];
     reg->siglaPais[1] = regOrig->siglaPais[1];
     reg->siglaPais[2] = '\0';
 
     reg->idPoPsConec = regOrig->idPoPsConec;
     
-    reg->undMedida = malloc(2 * sizeof(char));
+    reg->undMedida = (char*) malloc(2 * sizeof(char));
     reg->undMedida[0] = regOrig->undMedida[0];
     reg->undMedida[1] = '\0';
 
     reg->veloc = regOrig->veloc;
 
-    reg->nomePais = malloc(strlen(regOrig->nomePais) * sizeof(char));
+    reg->nomePais = (char*) malloc(45 * sizeof(char));
     strcpy(reg->nomePais, regOrig->nomePais);
-    reg->nomePoPs = malloc(strlen(regOrig->nomePoPs) * sizeof(char));
+    reg->nomePoPs = (char*) malloc(45 * sizeof(char));
     strcpy(reg->nomePoPs, regOrig->nomePoPs);
 }
 

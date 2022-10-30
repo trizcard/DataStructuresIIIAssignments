@@ -1,6 +1,5 @@
 #include "funcFornecidas.h"
 
-
 void binarioNaTela(char *nomeArquivoBinario){ /* Você não precisa entender o código dessa função. */
 
 	/* Use essa função para comparação no run.codes. Lembre-se de ter fechado (fclose) o arquivo anteriormente.
@@ -65,6 +64,7 @@ void scan_quote_string(char *str) {
 			R = getchar();
 			i++;
 		}
+		str[i] = '\0';
 	} else { // EOF
 		strcpy(str, "");
 	}
