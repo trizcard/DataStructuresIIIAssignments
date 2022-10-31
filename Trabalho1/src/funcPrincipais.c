@@ -276,6 +276,10 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
         desalocarRegistro(&regAux);
         return;
     }
+    fseek(arq, 0, SEEK_SET);
+    char status = '0';
+    fwrite(&status, sizeof(char), 1, arq);
+    fseek(arq, 960, SEEK_SET);
 
     filtro filtros[n];
 

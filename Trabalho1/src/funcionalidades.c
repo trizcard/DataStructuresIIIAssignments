@@ -5,7 +5,7 @@ void funcUM(char nomeArq[25], char nomeArq2[25]){
     FILE *arqEntrada;
     arqEntrada = fopen(nomeArq, "r");
     if(arqEntrada == NULL){
-        printf("Falha no carregamento do arquivo.\n");
+        printf("Falha no processamento do arquivo.\n");
         return;
     }
 
@@ -111,20 +111,14 @@ void funcQUATRO(char nomeArq[25]){
     FILE *arq = NULL;
     arq = fopen(nomeArq, "rb+");
 
-    char status;
-    fread(&status, sizeof(char), 1, arq);
-    if (arq == NULL || status == '0'){
+    if (arq == NULL){
         printf("Falha no processamento do arquivo.\n");
         return;
     }
-    fseek(arq, 0, SEEK_SET);
-    status = '0';
-    fwrite(&status, sizeof(char), 1, arq);
-    fseek(arq, 0, SEEK_SET);
 
     filtrar(arq, 4);
     fseek(arq, 0, SEEK_SET);
-    status = '1';
+    char status = '1';
     fwrite(&status, sizeof(char), 1, arq);
     fclose(arq);
     binarioNaTela(nomeArq);
