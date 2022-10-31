@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include "funcionalidades.h"
 
+// Integrantes da dupla
+// Beatriz Cardoso de Oliveira NUSP: 12566400
+// Participação: 100%
+// Beatriz Lomes da Silva NUSP: 12548038
+// Participação: 100%
+
 int main() {
     int func;
     char nomeArq[25];

@@ -111,12 +111,21 @@ void funcQUATRO(char nomeArq[25]){
     FILE *arq = NULL;
     arq = fopen(nomeArq, "rb+");
 
-    if (arq == NULL){
+    char status;
+    fread(&status, sizeof(char), 1, arq);
+    if (arq == NULL || status == '0'){
         printf("Falha no processamento do arquivo.\n");
         return;
     }
+    fseek(arq, 0, SEEK_SET);
+    status = '0';
+    fwrite(&status, sizeof(char), 1, arq);
+    fseek(arq, 0, SEEK_SET);
 
     filtrar(arq, 4);
+    fseek(arq, 0, SEEK_SET);
+    status = '1';
+    fwrite(&status, sizeof(char), 1, arq);
     fclose(arq);
     binarioNaTela(nomeArq);
 }
