@@ -23,4 +23,4 @@ int verificarRemovido (FILE* arqSaida);
 // Funções gerais das funcionalidades
 void imprimirSaida (FILE *arq);
 int analisarCampo (filtro *filtros, int i, registro *reg);
-void filtrar (FILE *arq, int tipo);
+int filtrar (FILE *arq, int tipo);

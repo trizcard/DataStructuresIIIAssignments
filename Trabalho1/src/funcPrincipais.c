@@ -257,7 +257,7 @@ int analisarCampo(filtro *filtros, int i, registro *reg){
 }
 
 // Função que filtra os registros de acordo com as entradas
-void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
+int filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
     int n;
     scanf("%d", &n);
     
@@ -274,7 +274,7 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
         printf("Falha no processamento do arquivo.\n");
         free(cab.lixo);
         desalocarRegistro(&regAux);
-        return;
+        return 0;
     }
     fseek(arq, 0, SEEK_SET);
     char status = '0';
@@ -320,12 +320,10 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
             if (*regFiltrados[i] == NULL){
                 printf("Registro inexistente.\n\n");
                 free(regFiltrados[i]);
-                free(cab.lixo);
-                desalocarRegistro(&regAux);
-                free(regFiltrados);
                 printf("Numero de paginas de disco: %d\n\n", cab.nPagDisco);
                 return;
             }else{
+                free(regFiltrados[i]);
                 imprimirListaReg((regFiltrados[i]));
             }
             printf("Numero de paginas de disco: %d\n\n", cab.nPagDisco);
@@ -347,4 +345,5 @@ void filtrar(FILE *arq, int tipo){ // tipo 3 = imprime, tipo 4 = remove
     desalocarRegistro(&regAux);
     free(regFiltrados);
     free(cab.lixo);
+    return 1;
 }

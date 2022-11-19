@@ -110,18 +110,21 @@ void funcQUATRO(char nomeArq[25]){
     // abre arquivo e verifica se funcionou de acordo com a funcao
     FILE *arq = NULL;
     arq = fopen(nomeArq, "rb+");
+    int flag;
 
     if (arq == NULL){
         printf("Falha no processamento do arquivo.\n");
         return;
     }
 
-    filtrar(arq, 4);
+    flag = filtrar(arq, 4);
     fseek(arq, 0, SEEK_SET);
     char status = '1';
     fwrite(&status, sizeof(char), 1, arq);
     fclose(arq);
-    binarioNaTela(nomeArq);
+    if (flag){
+        binarioNaTela(nomeArq);
+    }
 }
 
 void funcCINCO(char nomeArq[25], int n){
