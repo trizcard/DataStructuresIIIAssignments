@@ -1,4 +1,4 @@
-#include "funcPrincipais.h"
+#include "funcoesPrincipais.h"
 
 void criarCabecalho(cabecalho *cab){
     cab->status = '0';
@@ -45,7 +45,7 @@ void lerCabecalho(FILE *arq, cabecalho *cab){
 
 // Função que inicializa o registro após a sua criação e seta os valores iniciais
 void inicializarRegistro(registro *reg){
-    reg->removido[0] = '0';
+    reg->removido = '0';
     reg->encadeamento = -1;
     reg->nomePais = (char *) malloc(45 * sizeof(char));
     reg->nomePoPs = (char *) malloc(45 * sizeof(char));
@@ -72,8 +72,8 @@ void desalocarRegistro(registro *reg){
 
 // Função que lê o registro do arquivo de entrada
 int lerRegistro(FILE *arq, registro *reg){
-    fread(reg->removido, sizeof(char), 1, arq);
-    if (reg->removido[0] == '1'){
+    fread(&reg->removido, sizeof(char), 1, arq);
+    if (reg->removido == '1'){
         fseek(arq, 63, SEEK_CUR);
         return 0;
     }
@@ -316,10 +316,7 @@ void filtrar(FILE *arq){
         if (*regFiltrados[i] == NULL){
             printf("Registro inexistente.\n\n");
             free(regFiltrados[i]);
-            printf("Numero de paginas de disco: %d\n\n", cab.nPagDisco);
-            return;
         }else{
-            free(regFiltrados[i]);
             imprimirListaReg((regFiltrados[i]));
         }
         printf("Numero de paginas de disco: %d\n\n", cab.nPagDisco);
@@ -329,7 +326,6 @@ void filtrar(FILE *arq){
     free(regFiltrados);
     free(cab.lixo);
 }
-
 
 // Função que remove os registros filtrados de acordo com as entradas
 int remover(FILE *arq){

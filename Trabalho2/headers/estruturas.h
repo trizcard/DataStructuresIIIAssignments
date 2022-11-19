@@ -30,8 +30,8 @@ struct registro{
 typedef struct registro registro;
 
 struct filtro{
-    char *nomeCampo;
-    char *valorCampo;
+    char nomeCampo[25];
+    char valorCampo[25];
 };
 typedef struct filtro filtro;
 

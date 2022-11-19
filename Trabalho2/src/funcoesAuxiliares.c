@@ -1,4 +1,4 @@
-#include "funcAuxiliares.h"
+#include "funcoesAuxiliares.h"
 
 void addLixo(char *lixo, int inicio, int tam){
     for (int i = inicio; i < (inicio + tam); i++){
@@ -147,7 +147,7 @@ void percorrerCampo(void *campo, int *posi, char *linha, char *varAux, int intei
 void entradaRegistro(registro *reg){
     //Pegar o idConecta
     char *idConecta = (char*) malloc(10 * sizeof(char));
-    scanf("%s ",idConecta );
+    scanf("%s ", idConecta);
     verificaCampoNulo(idConecta, &reg->idConecta, 1);
     free(idConecta);
 
