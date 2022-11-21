@@ -1,22 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define LIXO '$'
+
+struct cabecalhoArv{
+    char status; // 0 ou 1
+    int noRaiz; // -1 p/ vazio
+    int nroChavesTotal;
+    int alturaArvore;
+    int RRNproxNo; //rrn do proximo No
+    char *lixo; // 48 bytes 
+};
+typedef struct cabecalhoArv cabecalhoArv;
 
 struct cabecalho{
-    char status;
-    int topo;
-    int proxRRN;
-    int nRegRemov;
-    int nPagDisco;
-    int qtdCompact;
-    char *lixo;
+    char status; // 0 ou 1
+    int topo; // -1 p/ vazio
+    int proxRRN; // rrn do proximo registro
+    int nRegRemov; // numero de registros removidos
+    int nPagDisco; // numero de paginas de disco
+    int qtdCompact; // quantidade de vezes que o arquivo foi compactado
+    char *lixo; // 939 bytes
 
 };
 typedef struct cabecalho cabecalho;
 
+struct registroArv{
+    char folha; // 0 ou 1, caso seja ou nao folha
+    int nroChavesNo; // numero de chaves indexadas ao No
+    int alturaNo; // altura com relacao ao No folha
+    int RRNdoNo; // rrn do No
+    // Pi -> ponteiro para uma subarvore de i (no total sao 5)
+    // Ci -> chave de busca de i (no total sao 4)
+    // Pri -> campo de referencia para o registro correspondente a Ci
+    int P1; 
+    int C1;
+    int Pr1;
+
+    int P2;
+    int C2;
+    int Pr2;
+
+    int P3;
+    int C3;
+    int Pr3;
+
+    int P4;
+    int C4;
+    int Pr4;
+
+    int P5;
+};
+typedef struct registroArv registroArv;
+
 struct registro{
-    char removido;
+    char removido; 
     int encadeamento;
     int idConecta;
     char *siglaPais;
