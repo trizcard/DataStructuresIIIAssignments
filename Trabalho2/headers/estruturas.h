@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define ORDEM 5
 
 struct cabecalhoArv{
     char status; // 0 ou 1
@@ -32,23 +33,10 @@ struct registroArv{
     // Pi -> ponteiro para uma subarvore de i (no total sao 5)
     // Ci -> chave de busca de i (no total sao 4)
     // Pri -> campo de referencia para o registro correspondente a Ci
-    int P1; 
-    int C1;
-    int Pr1;
 
-    int P2;
-    int C2;
-    int Pr2;
-
-    int P3;
-    int C3;
-    int Pr3;
-
-    int P4;
-    int C4;
-    int Pr4;
-
-    int P5;
+    registroArv *P[ORDEM];
+    int C[ORDEM-1];
+    int Pr[ORDEM-1];
 };
 typedef struct registroArv registroArv;
 
