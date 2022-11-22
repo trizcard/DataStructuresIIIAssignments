@@ -101,8 +101,14 @@ void funcTRES(char nomeArq[25]){
         printf("Falha no processamento do arquivo.\n");
         return;
     }
+    int n;
+    scanf("%d", &n);
+    filtro *filtros;
+    filtros = (filtro*) malloc(n * sizeof(filtro));
 
-    filtrar(arq);
+    lerFiltros(filtros, n);
+    filtrar(arq, filtros, n);
+    free(filtros);
     fclose(arq);
 }
 
@@ -330,4 +336,21 @@ void funcSEIS(char nomeArq[25]){
     
     //imprimir o resultado
     binarioNaTela(nomeArq);  
+}
+
+void funcSETE(char nomeArq[25]){
+
+}
+
+void funcOITO(char nomeArq[25]){
+    int n;
+    scanf("%d", &n);
+}
+
+void funcNOVE(char nomeArq[25]){
+
+}
+
+void funcDEZ(char nomeArq[25]){
+
 }

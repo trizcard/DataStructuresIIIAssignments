@@ -21,3 +21,23 @@ int buscarArvore (pagArvore *raiz, int dado){
     }
     return 0; // nao achou    
 }
+
+int buscaBin (pagArvore *noAtual, int dado){
+    int inicio = 0;
+    int fim = noAtual->nroChavesNo - 1;
+    int meio;
+
+    while (inicio <= fim){
+        meio = (inicio + fim) / 2;
+        if (dado == noAtual->C[meio]){
+            return meio;
+        }
+        else if (dado < noAtual->C[meio]){
+            fim = meio - 1;
+        }
+        else{
+            inicio = meio + 1;
+        }
+    }
+    return inicio;
+}

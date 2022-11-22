@@ -256,11 +256,16 @@ int analisarCampo(filtro *filtros, int i, registro *reg){
     }
 }
 
+// Função que le os filtros de um arquivo de entrada
+void lerFiltros(filtro *filtros, int n){
+    for(int i = 0; i < n; i++){
+        fscanf(stdin, "%s", filtros[i].nomeCampo);
+        scan_quote_string(filtros[i].valorCampo);
+    }
+}
+
 // Função que filtra os registros de acordo com as entradas
-void filtrar(FILE *arq){ 
-    int n;
-    scanf("%d", &n);
-    
+void filtrar(FILE *arq, filtro* filtros, int n){ 
     // cria um registro auxiliar
     registro regAux;
     alocaRegistro(&regAux);
@@ -281,15 +286,10 @@ void filtrar(FILE *arq){
     fwrite(&status, sizeof(char), 1, arq);
     fseek(arq, 960, SEEK_SET);
 
-    filtro filtros[n];
-
     // uma lista de registros para cada um dos filtros
     Lista **regFiltrados;
     regFiltrados = (Lista**) malloc(n * sizeof(Lista*));
-
     for(int i = 0; i < n; i++){
-        fscanf(stdin, "%s", filtros[i].nomeCampo);
-        scan_quote_string(filtros[i].valorCampo);
         regFiltrados[i] = (Lista*) malloc(sizeof(Lista));
     }
 
