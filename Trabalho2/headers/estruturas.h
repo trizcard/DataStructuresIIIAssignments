@@ -25,20 +25,20 @@ struct cabecalho{
 };
 typedef struct cabecalho cabecalho;
 
-struct registroArv{
+struct pagArvore{
     char folha; // 0 ou 1, caso seja ou nao folha
     int nroChavesNo; // numero de chaves indexadas ao No
     int alturaNo; // altura com relacao ao No folha
     int RRNdoNo; // rrn do No
+
     // Pi -> ponteiro para uma subarvore de i (no total sao 5)
     // Ci -> chave de busca de i (no total sao 4)
     // Pri -> campo de referencia para o registro correspondente a Ci
-
-    registroArv *P[ORDEM];
+    pagArvore *P[ORDEM];
     int C[ORDEM-1];
     int Pr[ORDEM-1];
 };
-typedef struct registroArv registroArv;
+typedef struct pagArvore pagArvore;
 
 struct registro{
     char removido; 
