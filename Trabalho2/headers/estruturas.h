@@ -34,7 +34,7 @@ struct pagArvore{
     // Pi -> ponteiro para uma subarvore de i (no total sao 5)
     // Ci -> chave de busca de i (no total sao 4)
     // Pri -> campo de referencia para o registro correspondente a Ci
-    struct pagArvore *P[ORDEM];
+    int P[ORDEM];
     int C[ORDEM-1];
     int Pr[ORDEM-1];
 };
