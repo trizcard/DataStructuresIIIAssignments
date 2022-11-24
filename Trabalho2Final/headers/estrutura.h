@@ -4,15 +4,30 @@
 #define ORDEM 5
 #define TAMANHO_REG_DADOS 65
 
-struct cabecalhoArv{
+typedef struct {
     char status; // 0 ou 1
     int noRaiz; // -1 p/ vazio
     int nroChavesTotal;
     int alturaArvore;
     int RRNproxNo; //rrn do proximo No
-    char *lixo; // 48 bytes 
-};
-typedef struct cabecalhoArv cabecalhoArv;
+    char *lixo; // 49 bytes 
+}cabecalhoArv;
+
+typedef struct {
+    int c;//chave
+    int Pr;//Ponteiro para o registro
+}Dado;
+
+typedef struct {
+    char folha;
+    int nroChavesNo;
+    int alturaNo;
+    int RRNdoNo;
+
+    int P[ORDEM];
+    Dado CP[ORDEM-1];
+}no;
+
 
 struct cabecalho{
     char status; // 0 ou 1
@@ -26,21 +41,6 @@ struct cabecalho{
 };
 typedef struct cabecalho cabecalho;
 
-struct pagArvore{
-    char folha; // 0 ou 1, caso seja ou nao folha
-    int nroChavesNo; // numero de chaves indexadas ao No
-    int alturaNo; // altura com relacao ao No folha
-    int RRNdoNo; // rrn do No
-
-    // Pi -> ponteiro para uma subarvore de i (no total sao 5)
-    // Ci -> chave de busca de i (no total sao 4)
-    // Pri -> campo de referencia para o registro correspondente a Ci
-    int P[ORDEM];
-    int C[ORDEM-1];
-    int Pr[ORDEM-1];
-};
-typedef struct pagArvore pagArvore;
-
 struct registro{
     char removido; 
     int encadeamento;
@@ -53,6 +53,7 @@ struct registro{
     char *nomePoPs;
     char *nomePais;
 };
+
 typedef struct registro registro;
 
 struct filtro{

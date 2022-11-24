@@ -1,6 +1,6 @@
 #include "funcoesIndex.h"
 
-void lerPgDados(FILE *arqDados, pagArvore *arvore){
+void lerPgDados(FILE *arqDados, no *arvore){
     // Lê uma página de dados da árvore-B
     fread(&arvore->folha, sizeof(char), 1, arqDados);
     fread(&arvore->nroChavesNo, sizeof(int), 1, arqDados);
@@ -20,7 +20,7 @@ void lerPgDados(FILE *arqDados, pagArvore *arvore){
 int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAchada){
     fseek(arq, (RRNarv * TAMANHO_REG_DADOS), SEEK_SET);
 
-    pagArvore pagAux;
+    no pagAux;
     lerPgDados(arq, &pagAux);
     for (int i = 0; i < pagAux.nroChavesNo; i++){
         if (chave == pagAux.C[i]){
@@ -45,4 +45,16 @@ int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAcha
         PosiAchada = pagAux.nroChavesNo-1;
         return 0;
     }
+}
+
+
+void criarCabecalhoIndice(FILE *arquivo, cabecalhoArv *cabecalho){
+    cabecalho->status = '0';
+    cabecalho->noRaiz = -1;
+    cabecalho->nroChavesTotal = 0;
+    cabecalho->alturaArvore = 0;
+    cabecalho->RRNproxNo = 0;
+    cabecalho->lixo = (char*) malloc(49 * sizeof(char));
+    addLixo(cabecalho->lixo, 0,49);
+    fwrite(cabecalho, sizeof(cabecalhoArv), 1, arquivo);
 }
