@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define ORDEM 5
-#define TAMANHO_REG 960
+#define TAMANHO_REG 64
 #define TAMANHO_REG_DADOS 65
 
 typedef struct {

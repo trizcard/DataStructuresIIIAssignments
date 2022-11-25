@@ -104,6 +104,8 @@ void funcOITO(char nomeArqDados[25], char nomeArq[25], int n){
     int flagJaLeu = 0;
     Lista *listaCompleta;
     listaCompleta = (Lista*) malloc(sizeof(Lista));
+
+    int paginas;
     
     lerFiltros(filtros, n);
     for (int i = 0; i < n; i++){
@@ -115,7 +117,7 @@ void funcOITO(char nomeArqDados[25], char nomeArq[25], int n){
             FILE *arqDados = NULL;
             arqDados = fopen(nomeArqDados, "rb");
             
-            filtrarChave(arq, arqDados, filtros[i].valorCampo);
+            paginas = filtrarChave(arq, arqDados, filtros[i].valorCampo);
             fclose(arqDados);
         }
 
@@ -129,8 +131,9 @@ void funcOITO(char nomeArqDados[25], char nomeArq[25], int n){
             if (filtrar(&cab, listaCompleta, (filtros[i])) == 0){
                 printf("Registro inexistente.\n");
             }
+            paginas = cab.nPagDisco;
         }
-        printf("\nNumero de paginas de disco: %d\n\n", cab.nPagDisco);
+        printf("Numero de paginas de disco: %d\n\n", paginas);
     }
 
     free(listaCompleta);

@@ -25,20 +25,22 @@ void lerCabecalhoArv(FILE *arq, cabecalhoArv *cab){
     cab->lixo[48] = '\0';
 }
 
-int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAchada){
+int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAchada, int pagAcessadas){
     fseek(arq, ((RRNarv+1) * TAMANHO_REG_DADOS), SEEK_SET);
     no pagAux;
     lerPgDados(arq, &pagAux);
+    pagAcessadas++;
     
     for (int i = 0; i < pagAux.nroChavesNo; i++){
         if (chave == pagAux.CP[i].c){
+            pagAcessadas++;
             *RRNachado = RRNarv;
             *PosiAchada = i;
-            return 1;
+            return pagAcessadas;
         }
         else if (chave < pagAux.CP[i].c){
             if (pagAux.folha == '0'){
-                return buscarArvore(arq, pagAux.P[i], chave, RRNachado, PosiAchada);
+                return buscarArvore(arq, pagAux.P[i], chave, RRNachado, PosiAchada, pagAcessadas);
             }
             else {
                 *RRNachado = RRNarv;
@@ -48,7 +50,7 @@ int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAcha
         }
     }
     if (pagAux.folha == '0'){
-        return buscarArvore(arq, pagAux.P[pagAux.nroChavesNo], chave, RRNachado, PosiAchada);
+        return buscarArvore(arq, pagAux.P[pagAux.nroChavesNo], chave, RRNachado, PosiAchada, pagAcessadas);
     }
     else {
         *RRNachado = RRNarv;
@@ -57,31 +59,35 @@ int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAcha
     }
 }
 
-void filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo){
+int filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo){
     int RRNachado = 0;
     int PosiAchada = 0;
+    int pagAcessadas = 1; // inicia com 1, pois conta a pagina do cabeçalho
     
     cabecalhoArv cabArv;
     cabArv.lixo = (char*)malloc(49*sizeof(char));
     lerCabecalhoArv(arqDados, &cabArv);
-
-    if (buscarArvore(arqDados, cabArv.noRaiz, atoi(valorCampo), &RRNachado, &PosiAchada) == 1){
+    
+    pagAcessadas = buscarArvore(arqDados, cabArv.noRaiz, atoi(valorCampo), &RRNachado, &PosiAchada, pagAcessadas);
+    if (pagAcessadas != 0){
         no pagAux;
         fseek(arqDados, ((RRNachado+1) * TAMANHO_REG_DADOS), SEEK_SET);
         lerPgDados(arqDados, &pagAux);
-        
-/*
+
         // imprime registro
-        fseek(arq, ((pagAux.Pr[PosiAchada]) * TAMANHO_REG), SEEK_SET);
+        fseek(arq, ((pagAux.CP[PosiAchada].Pr) * TAMANHO_REG) + 960, SEEK_SET);
         registro reg;
+        alocaRegistro(&reg);
+        pagAcessadas++; // acesso a pagina do registro
         lerRegistro(arq, &reg);
         imprimeRegistro(&reg);
-        */
+        desalocarRegistro(&reg);
     }
     else {
         printf("Registro inexistente.\n");
     }
     free(cabArv.lixo);
+    return pagAcessadas;
 }
 
 // Função para inserir uma chave numa arvore b
