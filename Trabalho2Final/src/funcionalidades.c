@@ -13,14 +13,14 @@ void funcOITO(char nomeArqDados[25], char nomeArq[25], int n){
         printf("Falha no processamento do arquivo.\n");
         return;
     }
-    int n;
-    scanf("%d", &n);
+
     filtro *filtros;
     filtros = (filtro*) malloc(n * sizeof(filtro));
 
     // cria cabecalho
     cabecalho cab;
     cab.lixo = (char*) malloc(939*sizeof(char));
+    lerCabecalho(arq, &cab);
 
     int flagJaLeu = 0;
     Lista *listaCompleta;
@@ -35,8 +35,8 @@ void funcOITO(char nomeArqDados[25], char nomeArq[25], int n){
             // abre arquivo e verifica se funcionou de acordo com a funcao
             FILE *arqDados = NULL;
             arqDados = fopen(nomeArqDados, "rb");
-
-            filtrarChave(arqDados, listaCompleta, filtros[i].valorCampo);
+            
+            filtrarChave(arq, arqDados, filtros[i].valorCampo);
             fclose(arqDados);
         }
 
@@ -47,11 +47,11 @@ void funcOITO(char nomeArqDados[25], char nomeArq[25], int n){
                 lerArquivo(arq, &cab, listaCompleta);
                 flagJaLeu = 1;
             }
-            if (filtrar(&cab, listaCompleta, filtros[i]) == 0){
+            if (filtrar(&cab, listaCompleta, (filtros[i])) == 0){
                 printf("Registro inexistente.\n");
             }
         }
-        printf("Numero de paginas de disco: %d\n\n", cab.nPagDisco);
+        printf("\nNumero de paginas de disco: %d\n\n", cab.nPagDisco);
     }
 
     free(listaCompleta);

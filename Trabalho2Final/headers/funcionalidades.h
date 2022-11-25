@@ -1,4 +1,3 @@
-#include "funcoesDados.h"
 #include "funcoesIndex.h"
 #define LIXO '$'
 

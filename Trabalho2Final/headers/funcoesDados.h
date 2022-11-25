@@ -1,4 +1,5 @@
 #include "estrutura.h"
+#include "funcoesFornecidas.h"
 
 void lerCabecalho (FILE *arq, cabecalho *cab);
 
@@ -6,6 +7,9 @@ void lerCabecalho (FILE *arq, cabecalho *cab);
 void alocaRegistro(registro *reg);
 void desalocarRegistro (registro *reg);
 int lerRegistro (FILE *arq, registro *reg);
+void passarReg(registro *reg, registro *regOrig);
+void adicionarListaReg(Lista *lista, registro *regOrig);
+int buscaLista(Lista *lista, registro *reg, int index);
 void lerCampoVar (char *string, char *strPoPs, char *strPais);
 void lerArquivo(FILE *arq, cabecalho *cab, Lista *lista);
 void imprimeRegistro (registro *regAux);
