@@ -91,29 +91,83 @@ int filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo){
 }
 
 // Função para inserir uma chave numa arvore b
-void inserirArvore(FILE *arq, int RRNatual, int chave, int RRNchave){
-    no pagAux;
+// arq -> arquivo com a arvore B
+// chave -> chave a ser inserida
+// RRNchave -> RRN do registro que contem a chave
+// RRNarv -> RRN da pagina atual da arvore 
 
-    lerPgDados(arq, &pagAux);
-    for (int i = 0; i < pagAux.nroChavesNo; i++){
-        if (chave == pagAux.CP[i].c){
-            pagAux.CP[i].Pr = RRNchave;
-            return;
+int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, int *chavePromovida, int *filhoPromovido){
+    no pagAtual, pagProx;
+
+    int posicao;
+    int encontrado;
+    int promovido; // 1 se houve promocao, 0 se nao houve
+
+    // Chave e RRN da arvoreB a serem promovidos
+    int chavePromB;
+    int RRNpromB;
+
+    if(RRNchave == -1){
+        *chavePromovida = chave;
+        *filhoPromovido = -1;
+        return 1;
+    }
+    fseek(arq, ((RRNarv+1) * TAMANHO_REG_DADOS), SEEK_SET);
+    lerPgDados(arq, &pagAtual);
+
+    int RRNachado, PosiAchada, pagAcessadas;
+    if (buscarArvore(arq, RRNarv, chave, &RRNachado, &PosiAchada, pagAcessadas) != 0){
+        printf("Chave ja existente.\n");
+        return -1;
+    }
+
+    for (int i = 0; i < pagAtual.nroChavesNo; i++){
+        if (chave < pagAtual.CP[i].c){
+            promovido = inserirArvore(arq, chave, RRNchave, pagAtual.P[i], &chavePromB, &RRNpromB);
         }
-        else if (chave < pagAux.CP[i].c){
-            if (pagAux.folha == '0'){
-                inserirArvore(arq, pagAux.P[i], chave, RRNchave);
-            }
-            else {
-                return;
-            }
+        else if (i == pagAtual.nroChavesNo-1){
+            promovido = inserirArvore(arq, chave, RRNchave, pagAtual.P[i+1], &chavePromB, &RRNpromB);
         }
     }
-    if (pagAux.folha == '0'){
-        inserirArvore(arq, pagAux.P[pagAux.nroChavesNo-1], chave, RRNchave);
+    if (promovido == 0){
+        return 0; // sem promoção
+    }
+    if (pagAtual.nroChavesNo < MAX_CHAVE){
+        inserirNo(&pagAtual, chavePromB, RRNpromB);
+        alterarNo(arq, &pagAtual, RRNarv);
+        return 0; // sem promoção
     }
     else {
-        pagAux.CP[pagAux.nroChavesNo-1].Pr = RRNchave;
-        return;
+        split();
+        alterarNo(arq, &pagAtual, RRNarv);
+        alterarNo(arq, &pagProx, filhoPromovido);
+        return 1; // com promoção
     }
+}
+
+void inserirNo(no *pagAtual, int chave, int RRNchave){
+    int i = pagAtual->nroChavesNo;
+    while (i > 0 && chave < pagAtual->CP[i-1].c){
+        pagAtual->CP[i] = pagAtual->CP[i-1];
+        pagAtual->P[i+1] = pagAtual->P[i];
+        i--;
+    }
+    pagAtual->CP[i].c = chave;
+    pagAtual->CP[i].Pr = RRNchave;
+    pagAtual->P[i+1] = RRNchave;
+    pagAtual->nroChavesNo++;
+}
+
+void alterarNo(FILE *arq, no *pagAtual, int RRNarv){
+    fseek(arq, ((RRNarv+1) * TAMANHO_REG_DADOS), SEEK_SET);
+    fwrite(&pagAtual->folha, sizeof(char), 1, arq);
+    fwrite(&pagAtual->nroChavesNo, sizeof(int), 1, arq);
+    fwrite(&pagAtual->alturaNo, sizeof(int), 1, arq);
+    fwrite(&pagAtual->RRNdoNo, sizeof(int), 1, arq);
+    for (int i = 0; i < MAX_CHAVE; i++){
+        fwrite(&pagAtual->CP[i].c, sizeof(int), 1, arq);
+        fwrite(&pagAtual->CP[i].Pr, sizeof(int), 1, arq);
+        fwrite(&pagAtual->P[i], sizeof(int), 1, arq);
+    }
+    fwrite(&pagAtual->P[pagAtual->nroChavesNo], sizeof(int), 1, arq);
 }
