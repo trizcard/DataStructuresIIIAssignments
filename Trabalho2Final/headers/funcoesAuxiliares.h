@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "estruturas.h"
+#include "estrutura.h"
 #include "funcoesFornecidas.h"
 #define LIXO '$'
 #define TAMANHO_REG 960

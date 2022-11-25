@@ -1,6 +1,7 @@
 #include "funcionalidades.h"
 
 void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
+    /*
      //abrir o arquivo de entrada
     FILE *arqEntrada;
     arqEntrada = fopen(nomeArq, "wb");
@@ -79,7 +80,7 @@ void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
     fclose(arqIndice);
 
 
-
+*/
 }
 
 void funcOITO(char nomeArqDados[25], char nomeArq[25], int n){

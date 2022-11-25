@@ -1,6 +1,6 @@
 #include "funcoesIndex.h"
 
-void lerPgDados(FILE *arqDados, pagArvore *arvore){
+void lerPgDados(FILE *arqDados, no *arvore){
     // Lê uma página de dados da árvore-B
     fread(&arvore->folha, sizeof(char), 1, arqDados);
     fread(&arvore->nroChavesNo, sizeof(int), 1, arqDados);
@@ -8,8 +8,8 @@ void lerPgDados(FILE *arqDados, pagArvore *arvore){
     fread(&arvore->RRNdoNo, sizeof(int), 1, arqDados);
     for(int i = 0; i < (arvore->nroChavesNo); i++){
         fread(&arvore->P[i], sizeof(int), 1, arqDados);
-        fread(&arvore->C[i], sizeof(int), 1, arqDados);
-        fread(&arvore->Pr[i], sizeof(int), 1, arqDados);
+        fread(&arvore->CP[i].c, sizeof(int), 1, arqDados);
+        fread(&arvore->CP[i].Pr, sizeof(int), 1, arqDados);
     }
     fread(&arvore->P[(arvore->nroChavesNo)], sizeof(int), 1, arqDados);
 }
@@ -27,16 +27,16 @@ void lerCabecalhoArv(FILE *arq, cabecalhoArv *cab){
 
 int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAchada){
     fseek(arq, ((RRNarv+1) * TAMANHO_REG_DADOS), SEEK_SET);
-    pagArvore pagAux;
+    no pagAux;
     lerPgDados(arq, &pagAux);
     
     for (int i = 0; i < pagAux.nroChavesNo; i++){
-        if (chave == pagAux.C[i]){
+        if (chave == pagAux.CP[i].c){
             *RRNachado = RRNarv;
             *PosiAchada = i;
             return 1;
         }
-        else if (chave < pagAux.C[i]){
+        else if (chave < pagAux.CP[i].c){
             if (pagAux.folha == '0'){
                 return buscarArvore(arq, pagAux.P[i], chave, RRNachado, PosiAchada);
             }
@@ -66,7 +66,7 @@ void filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo){
     lerCabecalhoArv(arqDados, &cabArv);
 
     if (buscarArvore(arqDados, cabArv.noRaiz, atoi(valorCampo), &RRNachado, &PosiAchada) == 1){
-        pagArvore pagAux;
+        no pagAux;
         fseek(arqDados, ((RRNachado+1) * TAMANHO_REG_DADOS), SEEK_SET);
         lerPgDados(arqDados, &pagAux);
         
@@ -86,15 +86,15 @@ void filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo){
 
 // Função para inserir uma chave numa arvore b
 void inserirArvore(FILE *arq, int RRNatual, int chave, int RRNchave){
-    pagArvore pagAux;
+    no pagAux;
 
     lerPgDados(arq, &pagAux);
     for (int i = 0; i < pagAux.nroChavesNo; i++){
-        if (chave == pagAux.C[i]){
-            pagAux.Pr[i] = RRNchave;
+        if (chave == pagAux.CP[i].c){
+            pagAux.CP[i].Pr = RRNchave;
             return;
         }
-        else if (chave < pagAux.C[i]){
+        else if (chave < pagAux.CP[i].c){
             if (pagAux.folha == '0'){
                 inserirArvore(arq, pagAux.P[i], chave, RRNchave);
             }
@@ -107,7 +107,7 @@ void inserirArvore(FILE *arq, int RRNatual, int chave, int RRNchave){
         inserirArvore(arq, pagAux.P[pagAux.nroChavesNo-1], chave, RRNchave);
     }
     else {
-        pagAux.Pr[pagAux.nroChavesNo-1] = RRNchave;
+        pagAux.CP[pagAux.nroChavesNo-1].Pr = RRNchave;
         return;
     }
 }

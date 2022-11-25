@@ -29,7 +29,6 @@ typedef struct {
     Dado CP[ORDEM-1];
 }no;
 
-
 struct cabecalho{
     char status; // 0 ou 1
     int topo; // -1 p/ vazio

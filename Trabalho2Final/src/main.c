@@ -46,7 +46,7 @@ int main() {
             break;
 */
         case 7:
-            funcSETE(nomeArq);
+            //funcSETE(nomeArq);
             break;
         
         case 8:
