@@ -1,4 +1,4 @@
-#include "funcoesDados.h"
+#include "funcoesPrincipais.h"
 
 void lerPgDados(FILE *arqDados, no *arvore);
 int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAchada);

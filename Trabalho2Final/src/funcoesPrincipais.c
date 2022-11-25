@@ -1,4 +1,4 @@
-#include "funcoesDados.h"
+#include "funcoesPrincipais.h"
 
 // Função que lê o cabeçalho do arquivo de entrada
 void lerCabecalho(FILE *arq, cabecalho *cab){
