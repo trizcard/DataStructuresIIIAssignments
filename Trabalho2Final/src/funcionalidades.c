@@ -75,7 +75,7 @@ void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
 
 }
 
-void funcOITO(char nomeArqDados[25], char nomeArq[25], int n){
+void funcOITO(char nomeArq[25], char nomeArqDados[25], int n){
     // abre arquivo e verifica se funcionou de acordo com a funcao
     FILE *arq = NULL;
     arq = fopen(nomeArq, "rb");
@@ -133,7 +133,7 @@ void funcOITO(char nomeArqDados[25], char nomeArq[25], int n){
     fclose(arq);
 }
 
-void funcNOVE(char nomeArq[25]){
+void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
 
 }
 

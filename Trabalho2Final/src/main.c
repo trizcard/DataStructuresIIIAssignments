@@ -52,6 +52,12 @@ int main() {
         case 8:
             fscanf(stdin, "%s", nomeArq2); // nome do arquivo
             scanf("%d", &n);
-            funcOITO(nomeArq2, nomeArq, n);
+            funcOITO(nomeArq, nomeArq2, n);
+        
+        case 9:
+            fscanf(stdin, "%s", nomeArq2);
+            scanf("%d", &n);
+            funcNOVE(nomeArq, nomeArq2, n);
+            
     }
 }
