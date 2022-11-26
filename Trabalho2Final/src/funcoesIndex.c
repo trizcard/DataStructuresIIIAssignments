@@ -89,7 +89,7 @@ int filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo){
     free(cabArv.lixo);
     return pagAcessadas;
 }
-
+/*
 // Função para inserir uma chave numa arvore b
 // arq -> arquivo com a arvore B
 // chave -> chave a ser inserida
@@ -170,4 +170,4 @@ void alterarNo(FILE *arq, no *pagAtual, int RRNarv){
         fwrite(&pagAtual->P[i], sizeof(int), 1, arq);
     }
     fwrite(&pagAtual->P[pagAtual->nroChavesNo], sizeof(int), 1, arq);
-}
+}*/

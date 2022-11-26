@@ -19,6 +19,42 @@ void alocaRegistro(registro *reg){
     reg->undMedida = (char *) malloc(2 * sizeof(char));
 }
 
+void entradaRegistro(registro *reg){
+    //Pegar o idConecta
+    char *idConecta = (char*) malloc(10 * sizeof(char));
+    scanf("%s ",idConecta );
+    verificaCampoNulo(idConecta, &reg->idConecta, 1);
+    free(idConecta);
+
+    //Pegar o nomePais
+    scan_quote_string(reg->nomePais);
+    verificaCampoNulo(reg->nomePais, reg->nomePais, 0);
+
+    //Pegar o nomePoPs
+    scan_quote_string(reg->nomePoPs);
+    verificaCampoNulo(reg->nomePoPs, &reg->nomePoPs, 0);
+
+    //Pegar a siglaPais
+    scan_quote_string(reg->siglaPais);
+    verificaCampoNulo(reg->siglaPais,&reg->siglaPais, 0);
+
+    //Pegar o idPoPsConec
+    char *idPoPsConec = (char*) malloc(10 * sizeof(char));
+    scanf("%s ", idPoPsConec);
+    verificaCampoNulo(idPoPsConec, &reg->idPoPsConec,1);
+    free(idPoPsConec);
+
+    //Pegar a undMedida
+    scan_quote_string(reg->undMedida);
+    verificaCampoNulo(reg->undMedida, &reg->undMedida, 0);
+
+    //Pegar a veloc
+    char *veloc = (char*) malloc(10 * sizeof(char));
+    scanf("%s", veloc);
+    verificaCampoNulo(veloc, &reg->veloc,1);
+    free(veloc);
+}
+
 //Função que desaloca o registro
 void desalocarRegistro(registro *reg){
     free(reg->nomePais);
@@ -93,6 +129,29 @@ void adicionarListaReg(Lista *lista, registro *regOrig){
         }
         aux->prox = novo;
     }
+}
+
+void adicionarRegArqSaida(FILE *arqSaida, registro *reg){
+    //Adicionar os campos no registro
+    //Campos tamanho fixo
+    fwrite(&reg->removido, sizeof(char), 1, arqSaida);
+    fwrite(&reg->encadeamento, sizeof (int), 1, arqSaida);
+    fwrite(&reg->idConecta, sizeof (int), 1, arqSaida);
+    fwrite(reg->siglaPais, sizeof (char), 2, arqSaida);
+    fwrite(&reg->idPoPsConec, sizeof (int), 1, arqSaida);
+    fwrite(reg->undMedida, sizeof(char), 1, arqSaida);
+    fwrite(&reg->veloc, sizeof (int), 1, arqSaida);
+    
+    //Campos tamanho variavel
+    adicionarCampoVariavel(arqSaida, reg->nomePoPs);
+    adicionarCampoVariavel(arqSaida, reg->nomePais);
+
+    //Adicionar lixo no restante da página de disco
+    int qtdLixoFinal = 64 - (strlen(reg->nomePoPs) + strlen(reg->nomePais) + 22);
+    char *lixo = malloc(qtdLixoFinal * sizeof(char));
+    addLixo(lixo, 0, qtdLixoFinal);
+    fwrite(lixo, sizeof(char) , qtdLixoFinal, arqSaida);
+    free(lixo);
 }
 
 // Funcao que busca registro do index na lista
@@ -196,6 +255,17 @@ void imprimeRegistro(registro *regAux){
         printf("Velocidade de transmissao: %d %sbps\n", regAux->veloc, regAux->undMedida);
     }
     printf("\n");
+}
+
+// Função que atualiza o cabeçalho do arquivo de dados
+void atualizarCab(FILE *arq, cabecalho *cab){
+    fseek(arq, 0, SEEK_SET);
+    fwrite(&cab->status, sizeof(char), 1, arq);
+    fwrite(&cab->topo, sizeof(int), 1, arq);
+    fwrite(&cab->proxRRN, sizeof(int), 1, arq);
+    fwrite(&cab->nRegRemov, sizeof(int), 1, arq);
+    fwrite(&cab->nPagDisco, sizeof(int), 1, arq);
+    fwrite(&cab->qtdCompact, sizeof(int), 1, arq);
 }
 
 // Função que analisa os campos de um registros de acordo com o filtro

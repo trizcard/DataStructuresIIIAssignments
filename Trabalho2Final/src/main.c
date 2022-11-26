@@ -46,18 +46,18 @@ int main() {
             break;
 */
         case 7:
-            funcSETE(nomeArq,nomeArq2);
+            //funcSETE(nomeArq,nomeArq2);
             break;
         
         case 8:
             fscanf(stdin, "%s", nomeArq2); // nome do arquivo
             scanf("%d", &n);
             funcOITO(nomeArq, nomeArq2, n);
-        
+            break;
         case 9:
             fscanf(stdin, "%s", nomeArq2);
             scanf("%d", &n);
             funcNOVE(nomeArq, nomeArq2, n);
-            
+            break;
     }
 }

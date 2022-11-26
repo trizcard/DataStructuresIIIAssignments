@@ -1,5 +1,5 @@
 #include "funcionalidades.h"
-
+/*
 void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
      //abrir o arquivo de entrada
     FILE *arqEntrada;
@@ -74,7 +74,7 @@ void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
     fclose(arqIndice);
 
 }
-
+*/
 void funcOITO(char nomeArq[25], char nomeArqDados[25], int n){
     // abre arquivo e verifica se funcionou de acordo com a funcao
     FILE *arq = NULL;
@@ -134,7 +134,83 @@ void funcOITO(char nomeArq[25], char nomeArqDados[25], int n){
 }
 
 void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
+    FILE *arq;
+    arq = fopen(nomeArq, "rb+");
+    if (arq == NULL){
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
 
+    FILE *arqArvore;
+    arqArvore = fopen(nomeArqDados, "rb+");
+    if (arqArvore == NULL){
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
+
+    cabecalho cab;
+    cab.lixo = (char*) malloc(959 * sizeof(char));
+    lerCabecalho(arq, &cab);
+
+    cabecalhoArv cabArv;
+    cabArv.lixo = (char*) malloc(55 * sizeof(char));
+    lerCabecalhoArv(arqArvore, &cabArv);
+
+    if (cab.status == '0' || cabArv.status == '0'){
+        printf("Falha no processamento do arquivo.\n");
+        free(cab.lixo);
+        free(cabArv.lixo);
+        fclose(arq);
+        fclose(arqArvore);
+        return;
+    }
+    char status = '0';
+    fseek(arq, 0, SEEK_SET);
+    fwrite(&status, 1, sizeof(char), arq);
+
+    fseek(arqArvore, 0, SEEK_SET);
+    fwrite(&status, 1, sizeof(char), arqArvore);
+
+    registro regAux;
+    alocaRegistro(&regAux);
+    for (int i = 0; i < n; i++){
+        regAux.removido = '0';
+        regAux.encadeamento = -1;
+        regAux.veloc = -1;
+        
+        entradaRegistro(&regAux);
+        adicionarLixoCampFixo(&regAux);
+
+        int RRN = cab.topo;
+        if (RRN == -1){
+            RRN = cab.proxRRN;
+            fseek(arq, (960 + (RRN * 64)), SEEK_SET);
+            adicionarRegArqSaida(arq, &regAux);
+            cab.proxRRN ++;
+        }
+        else{
+            int RRNRemovido = pegarRRNencadeado(arq, RRN);
+            cab.topo = RRNRemovido;
+            cab.nRegRemov--;
+            fseek(arq, (960 + (RRN * 64)), SEEK_SET);
+            adicionarRegArqSaida(arq, &regAux);
+        }
+
+        float qtdRegPag = 960/64;
+        float nroPagDisco = (RRN/qtdRegPag)+1;
+        int nroPagDiscoInt = ceil(nroPagDisco); 
+
+        if (nroPagDiscoInt > cab.nPagDisco){
+            cab.nPagDisco = nroPagDiscoInt;
+        }
+    }
+    cab.status = '1';
+    atualizarCab(arq, &cab);
+    desalocarRegistro(&regAux);
+    free(cab.lixo);
+    fclose(arq);
+    fclose(arqArvore);
+    binarioNaTela(nomeArq);
 }
 
 void funcDEZ(char nomeArq[25]){

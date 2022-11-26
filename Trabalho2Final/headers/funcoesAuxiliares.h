@@ -11,3 +11,10 @@
 void addLixo (char *lixo, int inicio, int tam);
 
 int pegarRRN (FILE* arqSaida);
+void adicionarLixoCampFixo(registro *reg);
+void verificarCampoString(char *campo, int tam, int inicio);
+int verificarRemovido(FILE* arqSaida);
+int pegarRRNencadeado(FILE* arqSaida, int RRN);
+void verificaCampoNulo(char* campo, void *campoReg, int flagInt);
+void adicionarCampoVariavel(FILE *arqSaida, char *campo);
+void converterInt(int *campo, int flagNulo, char *valor);
