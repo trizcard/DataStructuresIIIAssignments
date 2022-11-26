@@ -109,6 +109,16 @@ void inicializarArv(no *pagArv){
     (*pagArv).P[MAX_CHAVE] = -1;
 }
 
+void atualizarCabArv(FILE *arqArvore, cabecalhoArv *cabArv){
+    fseek(arqArvore, 0, SEEK_SET);
+    fwrite(&cabArv->status, sizeof(char), 1, arqArvore);
+    fwrite(&cabArv->noRaiz, sizeof(int), 1, arqArvore);
+    fwrite(&cabArv->nroChavesTotal, sizeof(int), 1, arqArvore);
+    fwrite(&cabArv->alturaArvore, sizeof(int), 1, arqArvore);
+    fwrite(&cabArv->RRNproxNo, sizeof(int), 1, arqArvore);
+    fwrite(cabArv->lixo, sizeof(char), 48, arqArvore);
+}
+
 int buscarPagina(no pagAtual, int chave, int *PosiAchada){
     for (int i = 0; i < pagAtual.nroChavesNo && chave < pagAtual.CP[i].c; i++){
         *PosiAchada = i;
@@ -120,7 +130,7 @@ int buscarPagina(no pagAtual, int chave, int *PosiAchada){
     return 0;
 }
 
-int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido){
+int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido, cabecalhoArv *cabArv){
     no pagAtual, pagProx;
 
     int promovido; // 1 se houve promocao, 0 se nao houve
@@ -143,7 +153,7 @@ int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Pr
         return -1;
     }
 
-    promovido = inserirArvore(arq, chave, RRNchave, pagAtual.P[posicao], &PromB);
+    promovido = inserirArvore(arq, chave, RRNchave, pagAtual.P[posicao], &PromB, cabArv);
 
     if (promovido == 0){
         return 0; // sem promoção
@@ -154,6 +164,7 @@ int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Pr
         return 0; // sem promoção
     }
     else {
+        (*cabArv).RRNproxNo++;
         split(PromB, &pagAtual, Promovido, &pagProx);
         alterarNo(arq, &pagAtual, RRNarv);
         alterarNo(arq, &pagProx, Promovido->filho);

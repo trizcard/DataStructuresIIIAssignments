@@ -200,7 +200,8 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
         prom.chave = -1;
         prom.RRN = -1;
         prom.filho = -1; 
-        inserirArvore(arqArvore, regAux.idConecta, RRN, cabArv.noRaiz, &prom);
+        inserirArvore(arqArvore, regAux.idConecta, RRN, cabArv.noRaiz, &prom, &cabArv);
+        cabArv.nroChavesTotal++;
 
         float qtdRegPag = 960/64;
         float nroPagDisco = (RRN/qtdRegPag)+1;
@@ -211,7 +212,9 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
         }
     }
     cab.status = '1';
+    cabArv.status = '1';
     atualizarCab(arq, &cab);
+    atualizarCabArv(arqArvore, &cabArv);
     desalocarRegistro(&regAux);
     free(cab.lixo);
     fclose(arq);
