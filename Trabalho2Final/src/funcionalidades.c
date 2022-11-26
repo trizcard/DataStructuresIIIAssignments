@@ -195,6 +195,11 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
             fseek(arq, (960 + (RRN * 64)), SEEK_SET);
             adicionarRegArqSaida(arq, &regAux);
         }
+        promovidos prom;
+        prom.chave = -1;
+        prom.RRN = -1;
+        prom.filho = -1; 
+        inserirArvore(arqArvore, regAux.idConecta, RRN, cabArv.noRaiz, &prom);
 
         float qtdRegPag = 960/64;
         float nroPagDisco = (RRN/qtdRegPag)+1;
@@ -211,6 +216,7 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
     fclose(arq);
     fclose(arqArvore);
     binarioNaTela(nomeArq);
+    binarioNaTela(nomeArqDados);
 }
 
 void funcDEZ(char nomeArq[25]){

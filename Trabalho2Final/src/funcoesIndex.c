@@ -33,7 +33,6 @@ int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAcha
     
     for (int i = 0; i < pagAux.nroChavesNo; i++){
         if (chave == pagAux.CP[i].c){
-            pagAcessadas++;
             *RRNachado = RRNarv;
             *PosiAchada = i;
             return pagAcessadas;
@@ -62,7 +61,7 @@ int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAcha
 int filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo){
     int RRNachado = 0;
     int PosiAchada = 0;
-    int pagAcessadas = 1; // inicia com 1, pois conta a pagina do cabeçalho
+    int pagAcessadas = 2; // inicia com 2, pois conta a pagina do cabeçalho dos dois arquivos
     
     cabecalhoArv cabArv;
     cabArv.lixo = (char*)malloc(49*sizeof(char));
@@ -89,72 +88,142 @@ int filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo){
     free(cabArv.lixo);
     return pagAcessadas;
 }
-/*
+
 // Função para inserir uma chave numa arvore b
 // arq -> arquivo com a arvore B
 // chave -> chave a ser inserida
 // RRNchave -> RRN do registro que contem a chave
 // RRNarv -> RRN da pagina atual da arvore 
 
-int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, int *chavePromovida, int *filhoPromovido){
+void inicializarArv(no *pagArv){
+    (*pagArv).folha = '1';
+    (*pagArv).nroChavesNo = 0;
+    (*pagArv).alturaNo = 0;
+    (*pagArv).RRNdoNo = 0;
+
+    for(int i = 0; i < MAX_CHAVE; i++){
+        (*pagArv).P[i] = -1;
+        (*pagArv).CP[i].c = -1;
+        (*pagArv).CP[i].Pr = -1;
+    }
+    (*pagArv).P[MAX_CHAVE] = -1;
+}
+
+int buscarPagina(no pagAtual, int chave, int *PosiAchada){
+    for (int i = 0; i < pagAtual.nroChavesNo && chave > pagAtual.CP[i].c; i++){
+        *PosiAchada = i;
+        if (chave == pagAtual.CP[i].c && i < pagAtual.nroChavesNo){
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido){
     no pagAtual, pagProx;
 
-    int posicao;
-    int encontrado;
     int promovido; // 1 se houve promocao, 0 se nao houve
 
     // Chave e RRN da arvoreB a serem promovidos
-    int chavePromB;
-    int RRNpromB;
+    int posicao;
+    promovidos PromB;
 
     if(RRNchave == -1){
-        *chavePromovida = chave;
-        *filhoPromovido = -1;
+        Promovido->chave = chave;
+        Promovido->RRN = RRNchave;
+        Promovido->filho = -1;
         return 1;
     }
     fseek(arq, ((RRNarv+1) * TAMANHO_REG_DADOS), SEEK_SET);
     lerPgDados(arq, &pagAtual);
 
-    int RRNachado, PosiAchada, pagAcessadas;
-    if (buscarArvore(arq, RRNarv, chave, &RRNachado, &PosiAchada, pagAcessadas) != 0){
-        printf("Chave ja existente.\n");
+    if (buscarPagina(pagAtual, chave, &posicao) != 0){
+        printf("Chave ja existente.\n");   
         return -1;
     }
 
-    for (int i = 0; i < pagAtual.nroChavesNo; i++){
-        if (chave < pagAtual.CP[i].c){
-            promovido = inserirArvore(arq, chave, RRNchave, pagAtual.P[i], &chavePromB, &RRNpromB);
-        }
-        else if (i == pagAtual.nroChavesNo-1){
-            promovido = inserirArvore(arq, chave, RRNchave, pagAtual.P[i+1], &chavePromB, &RRNpromB);
-        }
-    }
+    promovido = inserirArvore(arq, chave, RRNchave, pagAtual.P[posicao], &PromB);
+
     if (promovido == 0){
         return 0; // sem promoção
     }
     if (pagAtual.nroChavesNo < MAX_CHAVE){
-        inserirNo(&pagAtual, chavePromB, RRNpromB);
+        inserirNo(&pagAtual, PromB);
         alterarNo(arq, &pagAtual, RRNarv);
         return 0; // sem promoção
     }
     else {
-        split();
+        split(PromB, &pagAtual, Promovido, &pagProx);
         alterarNo(arq, &pagAtual, RRNarv);
-        alterarNo(arq, &pagProx, filhoPromovido);
+        alterarNo(arq, &pagProx, Promovido->filho);
         return 1; // com promoção
     }
 }
 
-void inserirNo(no *pagAtual, int chave, int RRNchave){
+void split(promovidos PromB, no *pagAntiga, promovidos *Promovido, no *pagNova){
+    int i;
+    int chavesPresentes[MAX_CHAVE+1];
+    int RRNsPresentes[MAX_CHAVE+1];
+    int filhosPresentes[MAX_CHAVE+2];
+
+    for (i = 0; i < MAX_CHAVE; i++){
+        chavesPresentes[i] = pagAntiga->CP[i].c;
+        RRNsPresentes[i] = pagAntiga->CP[i].Pr;
+        filhosPresentes[i] = pagAntiga->P[i];
+    }
+
+    filhosPresentes[i] = pagAntiga->P[i];
+
+    for(i = MAX_CHAVE; PromB.chave < chavesPresentes[i-1] && i > 0; i--){
+        chavesPresentes[i] = chavesPresentes[i-1];
+        RRNsPresentes[i] = RRNsPresentes[i-1];
+        filhosPresentes[i+1] = filhosPresentes[i];
+    }
+    chavesPresentes[i] = PromB.chave;
+    RRNsPresentes[i] = PromB.RRN;
+    filhosPresentes[i+1] = PromB.filho;
+
+    inicializarArv(pagNova);
+    Promovido->filho = pagNova->RRNdoNo;
+
+    for(i = 0; i < MIN_CHAVE; i++){
+        pagAntiga->CP[i].c = chavesPresentes[i];
+        pagAntiga->CP[i].Pr = RRNsPresentes[i];
+        pagAntiga->P[i] = filhosPresentes[i];
+
+        pagNova->CP[i].c = chavesPresentes[i+MIN_CHAVE+1];
+        pagNova->CP[i].Pr = RRNsPresentes[i+MIN_CHAVE+1];
+        pagNova->P[i] = filhosPresentes[i+MIN_CHAVE+1];
+
+        pagAntiga->CP[i + MIN_CHAVE].c = -1;
+        pagAntiga->CP[i + MIN_CHAVE].Pr = -1;
+        pagAntiga->P[i + MIN_CHAVE + 1] = -1;
+    }
+
+    pagAntiga->P[MIN_CHAVE] = filhosPresentes[MIN_CHAVE];
+    pagNova->P[MIN_CHAVE] = filhosPresentes[i + MIN_CHAVE + 1];
+
+    pagAntiga->nroChavesNo = MIN_CHAVE;
+    pagNova->nroChavesNo = MAX_CHAVE - MIN_CHAVE;
+    
+    Promovido->chave = chavesPresentes[MIN_CHAVE];
+    Promovido->RRN = RRNsPresentes[MIN_CHAVE];
+}
+
+void inserirNo(no *pagAtual, promovidos PromB){
     int i = pagAtual->nroChavesNo;
-    while (i > 0 && chave < pagAtual->CP[i-1].c){
-        pagAtual->CP[i] = pagAtual->CP[i-1];
+    while (i > 0 && PromB.chave < pagAtual->CP[i-1].c){
+        pagAtual->CP[i].c = pagAtual->CP[i-1].c;
+        pagAtual->CP[i].Pr = pagAtual->CP[i-1].Pr;
         pagAtual->P[i+1] = pagAtual->P[i];
         i--;
     }
-    pagAtual->CP[i].c = chave;
-    pagAtual->CP[i].Pr = RRNchave;
-    pagAtual->P[i+1] = RRNchave;
+    pagAtual->CP[i].c = PromB.chave;
+    pagAtual->CP[i].Pr = PromB.RRN;
+    pagAtual->P[i+1] = PromB.filho;
     pagAtual->nroChavesNo++;
 }
 
@@ -170,4 +239,4 @@ void alterarNo(FILE *arq, no *pagAtual, int RRNarv){
         fwrite(&pagAtual->P[i], sizeof(int), 1, arq);
     }
     fwrite(&pagAtual->P[pagAtual->nroChavesNo], sizeof(int), 1, arq);
-}*/
+}

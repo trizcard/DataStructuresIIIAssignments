@@ -7,21 +7,30 @@
 #define TAMANHO_REG 64
 #define TAMANHO_REG_DADOS 65
 
-typedef struct {
+struct cabecalhoArv{
     char status; // 0 ou 1
     int noRaiz; // -1 p/ vazio
     int nroChavesTotal;
     int alturaArvore;
     int RRNproxNo; //rrn do proximo No
     char *lixo; // 49 bytes 
-}cabecalhoArv;
+};
+typedef struct cabecalhoArv cabecalhoArv;
 
-typedef struct {
+struct promovidos{
+    int chave;
+    int RRN;
+    int filho;
+};
+typedef struct promovidos promovidos;
+
+struct Dado{
     int c;//chave
     int Pr;//Ponteiro para o registro
-}Dado;
+};
+typedef struct Dado Dado;
 
-typedef struct {
+struct no{
     char folha;
     int nroChavesNo;
     int alturaNo;
@@ -29,7 +38,8 @@ typedef struct {
 
     int P[ORDEM];
     Dado CP[ORDEM-1];
-}no;
+};
+typedef struct no no;
 
 struct cabecalho{
     char status; // 0 ou 1
