@@ -165,6 +165,7 @@ int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Pr
     }
     else {
         (*cabArv).RRNproxNo++;
+        (*cabArv).alturaArvore++;
         split(PromB, &pagAtual, Promovido, &pagProx);
         alterarNo(arq, &pagAtual, RRNarv);
         alterarNo(arq, &pagProx, Promovido->filho);
