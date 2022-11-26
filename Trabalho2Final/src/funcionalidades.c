@@ -195,6 +195,7 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
             fseek(arq, (960 + (RRN * 64)), SEEK_SET);
             adicionarRegArqSaida(arq, &regAux);
         }
+        
         promovidos prom;
         prom.chave = -1;
         prom.RRN = -1;

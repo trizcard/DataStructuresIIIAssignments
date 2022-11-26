@@ -6,12 +6,12 @@ void lerPgDados(FILE *arqDados, no *arvore){
     fread(&arvore->nroChavesNo, sizeof(int), 1, arqDados);
     fread(&arvore->alturaNo, sizeof(int), 1, arqDados);
     fread(&arvore->RRNdoNo, sizeof(int), 1, arqDados);
-    for(int i = 0; i < (arvore->nroChavesNo); i++){
+    for(int i = 0; i < (MAX_CHAVE); i++){
         fread(&arvore->P[i], sizeof(int), 1, arqDados);
         fread(&arvore->CP[i].c, sizeof(int), 1, arqDados);
         fread(&arvore->CP[i].Pr, sizeof(int), 1, arqDados);
     }
-    fread(&arvore->P[(arvore->nroChavesNo)], sizeof(int), 1, arqDados);
+    fread(&arvore->P[(MAX_CHAVE)], sizeof(int), 1, arqDados);
 }
 
 void lerCabecalhoArv(FILE *arq, cabecalhoArv *cab){
@@ -110,15 +110,13 @@ void inicializarArv(no *pagArv){
 }
 
 int buscarPagina(no pagAtual, int chave, int *PosiAchada){
-    for (int i = 0; i < pagAtual.nroChavesNo && chave > pagAtual.CP[i].c; i++){
+    for (int i = 0; i < pagAtual.nroChavesNo && chave < pagAtual.CP[i].c; i++){
         *PosiAchada = i;
         if (chave == pagAtual.CP[i].c && i < pagAtual.nroChavesNo){
             return 1;
         }
-        else {
-            return 0;
-        }
     }
+    *PosiAchada = pagAtual.nroChavesNo;
     return 0;
 }
 
@@ -128,10 +126,10 @@ int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Pr
     int promovido; // 1 se houve promocao, 0 se nao houve
 
     // Chave e RRN da arvoreB a serem promovidos
-    int posicao;
+    int posicao = 0;
     promovidos PromB;
 
-    if(RRNchave == -1){
+    if(RRNarv == -1){
         Promovido->chave = chave;
         Promovido->RRN = RRNchave;
         Promovido->filho = -1;
