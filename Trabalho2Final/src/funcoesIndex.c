@@ -1,5 +1,6 @@
 #include "funcoesIndex.h"
 
+
 void lerPgDados(FILE *arqDados, no *arvore){
     // Lê uma página de dados da árvore-B
     fread(&arvore->folha, sizeof(char), 1, arqDados);
@@ -130,7 +131,19 @@ int buscarPagina(no pagAtual, int chave, int *PosiAchada){
     return 0;
 }
 
-int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido, cabecalhoArv *cabArv){
+int criaRaiz(FILE *arq, int chave, int RRNchave, int esq, int dir){
+    no pagRaiz;
+    inicializarArv(&pagRaiz);
+    pagRaiz.nroChavesNo = 1;
+    pagRaiz.CP[0].c = chave;
+    pagRaiz.CP[0].Pr = RRNchave;
+    pagRaiz.P[0] = esq;
+    pagRaiz.P[1] = dir;
+    alterarNo(arq, &pagRaiz, 0);
+    return pagRaiz.RRNdoNo;
+}
+
+int inserirArv(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido, cabecalhoArv *cabArv){
     no pagAtual, pagProx;
 
     int promovido; // 1 se houve promocao, 0 se nao houve
@@ -153,7 +166,7 @@ int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Pr
         return -1;
     }
 
-    promovido = inserirArvore(arq, chave, RRNchave, pagAtual.P[posicao], &PromB, cabArv);
+    promovido = inserirArv(arq, chave, RRNchave, pagAtual.P[posicao], &PromB, cabArv);
 
     if (promovido == 0){
         return 0; // sem promoção
@@ -165,7 +178,6 @@ int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Pr
     }
     else {
         (*cabArv).RRNproxNo++;
-        (*cabArv).alturaArvore++;
         split(PromB, &pagAtual, Promovido, &pagProx);
         alterarNo(arq, &pagAtual, RRNarv);
         alterarNo(arq, &pagProx, Promovido->filho);
@@ -249,4 +261,31 @@ void alterarNo(FILE *arq, no *pagAtual, int RRNarv){
         fwrite(&pagAtual->P[i], sizeof(int), 1, arq);
     }
     fwrite(&pagAtual->P[pagAtual->nroChavesNo], sizeof(int), 1, arq);
+}
+
+
+//Pegar o prox RRN do cabecalho arq de indice
+int getProxRRN(FILE *arq){
+    int RRN;
+    fseek(arq, 9, SEEK_SET);
+    fread(&RRN, sizeof(int), 1, arq);
+    return RRN;
+}
+
+//Atualizar o prox RRN do cabecalho arq de indice
+void atualizaProxRRN(FILE *arq, int RRN){
+    fseek(arq, 9, SEEK_SET);
+    fwrite(&RRN, sizeof(int), 1, arq);
+}
+
+//Função que envia RRN e posição no arquivo de indice e retorna o dado
+Dado buscarDado(FILE* arqIndice, int RRN, int posi){
+    //Buscar o dado no arquivo de indice
+    Dado dado;
+    fseek(arqIndice, 65 + ((RRN * 65) + 17) + (12 * posi), SEEK_SET);
+    //Ler a chave do dado
+    fread(&dado.c, sizeof(int), 4, arqIndice);
+    //Ler o RRN do dado
+    fread(&dado.Pr, sizeof(int), 4, arqIndice);
+    return dado;
 }

@@ -1,5 +1,6 @@
 #include "funcionalidades.h"
-/*
+
+
 void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
      //abrir o arquivo de entrada
     FILE *arqEntrada;
@@ -17,12 +18,11 @@ void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
         fclose(arqEntrada);
         return;
     }
-
+    
     // altera status do arquivo para 0
     fseek(arqEntrada, 0, SEEK_SET);
     status = '0';
     fwrite(&status, sizeof(char), 1, arqEntrada);   
-
     //Criar o arquivo de indice
     FILE *arqIndice;
     arqIndice = fopen(nomeArqIndice, "wb");
@@ -30,11 +30,9 @@ void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
         printf("Falha no carregamento do arquivo.\n");
         return;
     }
-
     //Criar o cabecalho do arquivo de indice
     cabecalhoArv cabIndice;
     criarCabecalhoIndice(&cabIndice);
-
     //Adicionar dados arquivo de entrada ao arquivo de indice
     //percorrer arquivo de entrada
     fseek(arqEntrada, 960, SEEK_SET);
@@ -43,38 +41,31 @@ void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
     while(RRN < qtdRRN){
         //criar o registro
         registro reg;
-
         //Inicializar Registro
         inicializarRegistro(&reg);
-
         //Pegar o registro do arquivo de entrada
         if(lerRegistro(arqEntrada, &reg)){
             //Adicionar o registro no arquivo de indice
                 //adicionarRegArqIndice(arqIndice, &reg, RRN);
         }
-
         //Desalocar variaveis   
         desalocarRegistro(&reg);
-
         RRN++;
     }
-
     //Mudar o status do arquivo de indice para 1 
     fseek(arqIndice, 0, SEEK_SET);
     status = '1';
     fwrite(&status, sizeof(char), 1, arqIndice);
-
     //Mudar o status do arquivo de entrada para 1
     fseek(arqEntrada, 0, SEEK_SET);
     status = '1';
     fwrite(&status, sizeof(char), 1, arqEntrada);
-
     //Fechar o arquivo de entrada e de indice
     fclose(arqEntrada);
     fclose(arqIndice);
-
 }
-*/
+
+
 void funcOITO(char nomeArq[25], char nomeArqDados[25], int n){
     // abre arquivo e verifica se funcionou de acordo com a funcao
     FILE *arq = NULL;
@@ -133,7 +124,11 @@ void funcOITO(char nomeArq[25], char nomeArqDados[25], int n){
     fclose(arq);
 }
 
+
+
+
 void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
+    /*
     FILE *arq;
     arq = fopen(nomeArq, "rb+");
     if (arq == NULL){
@@ -200,7 +195,13 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
         prom.chave = -1;
         prom.RRN = -1;
         prom.filho = -1; 
-        inserirArvore(arqArvore, regAux.idConecta, RRN, cabArv.noRaiz, &prom, &cabArv);
+        int promovido;
+
+        promovido = inserirArv(arqArvore, regAux.idConecta, RRN, cabArv.noRaiz, &prom, &cabArv);
+        if (promovido == 1){
+            cabArv.alturaArvore++;
+            cabArv.noRaiz = criaRaiz(arqArvore, &prom.chave, &prom.RRN, &cabArv.noRaiz, &prom.filho);
+        }
         cabArv.nroChavesTotal++;
 
         float qtdRegPag = 960/64;
@@ -221,8 +222,156 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
     fclose(arqArvore);
     binarioNaTela(nomeArq);
     binarioNaTela(nomeArqDados);
+    */
 }
 
-void funcDEZ(char nomeArq[25]){
+
+
+
+void funcDEZ(char nomeArq1[25], char nomeArq2[25],char nomeCampoArq1[25], char nomeCampoArq2[25], char nomeArqIndex[25]){
+    //Abrir o arquivo de entrada 1
+    FILE *arqEntrada;
+    arqEntrada = abrirArquivo(nomeArq1, "rb");
+    if (arqEntrada == NULL){
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
+
+    //Abrir o arquivo de entrada 2
+    FILE *arqEntrada2;
+    arqEntrada2 = abrirArquivo(nomeArq2, "rb");
+    if (arqEntrada2 == NULL){
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
+
+    //Abrir o arquivo de indice
+    FILE *arqIndice;
+    arqIndice = abrirArquivo(nomeArqIndex, "rb");
+    if (arqIndice == NULL){
+        printf("Falha no processamento do arquivo.\n");
+        return;
+    }
+
+    //Percore o arquivo de entrada
+    int RRN = 0;
+    int qtdRRN = pegarRRN(arqEntrada);
+    fseek(arqEntrada, 960, SEEK_SET);//Pular o cabecalho
+    int i = 0;
+
+    while(RRN < qtdRRN){
+        if(i > 6){
+            break;
+        }
+        //criar o registro
+        registro reg;
+
+        //Inicializar Registro
+        alocaRegistro(&reg);
+
+        //Pegar o registro do arquivo de entrada
+        if(lerRegistro(arqEntrada, &reg)){
+           //Pegar o valor do campo de busca do reg entrada
+            char *valorCampo;
+            valorCampo = (char*) malloc(100*sizeof(char));
+            strcpy(valorCampo, pegarValorCampo(&reg, nomeCampoArq1));
+
+            //Buscar o valor do campo 
+            if (verificarChave(nomeCampoArq2)){
+               //Fazer busca pelo indice
+               fseek(arqIndice, 0, SEEK_SET);
+               cabecalhoArv cabArvore;
+               cabArvore.lixo = (char*)malloc(49*sizeof(char));
+               lerCabecalhoArv(arqIndice, &cabArvore);
+
+               int chave = atoi(valorCampo);
+               int RRN = 0;
+               int posiNO = 0;
+               int pagAcessadas = 2;// inicia com 2, pois conta a pagina do cabeçalho dos dois arquivos
+                
+               pagAcessadas = buscarArvore(arqIndice, cabArvore.noRaiz, chave, &RRN, &posiNO, pagAcessadas);
+               //Imprimir o valor encontrado
+               if (pagAcessadas !=0){
+                no pagAux;
+                fseek(arqIndice, ((RRN+1) * TAMANHO_REG_DADOS), SEEK_SET);
+                lerPgDados(arqIndice, &pagAux);
+
+                // imprime registro
+                fseek(arqEntrada2, ((pagAux.CP[posiNO].Pr) * TAMANHO_REG) + 960, SEEK_SET);
+                
+                
+                registro reg2;
+                alocaRegistro(&reg2);
+                pagAcessadas++; // acesso a pagina do registro
+                lerRegistro(arqEntrada2, &reg2);
+    
+
+                
+                //Imprimir o registro
+                imprimeRegistro(&reg);
+                imprimeRegistro(&reg2);
+                
+                
+                
+
+                //Desalocar Registros 
+                desalocarRegistro(&reg2);
+                             
+               }                            
+            }else{
+                //Fazer busca sequencial no arquivo de entrada 2
+                // cria filtro
+                filtro fil;
+                //Copiar o campo e o valor no filtro 
+                strcpy(fil.nomeCampo, nomeCampoArq2);
+                //Copiar o 
+                strcpy(fil.valorCampo, valorCampo);
+
+                
+
+                //Percorrer o arquivo de entrada 2
+                int RRN = 0;
+                int qtdRRN = pegarRRN(arqEntrada2);
+                //Pular o cabecalho
+                fseek(arqEntrada2, 960, SEEK_SET);
+                while(RRN < qtdRRN){
+                    //criar o registro
+                    registro reg2;
+
+                    //Inicializar Registro
+                    alocaRegistro(&reg2);
+
+                    //Pegar o registro do arquivo de entrada
+                    if(lerRegistro(arqEntrada2, &reg2)){
+                        //Verificar se o registro tem o valor do campo
+                        if (analisarCampo(fil, &reg2)){
+                            //Imprimir o registro
+                            imprimeRegistro(&reg);
+                            imprimeRegistro(&reg2);
+                        }
+                    }
+                    //Desalocar o registro
+                    desalocarRegistro(&reg2);
+                    //Incrementar o RRN
+                    RRN++;
+                }                
+            }
+
+            //Liberar valorCampo
+            free(valorCampo);
+        }
+
+        //Desalocar variaveis   
+        desalocarRegistro(&reg);
+
+        RRN++;
+        i++;
+    }
+
+
+    //Fechar arquivos 
+    fclose(arqEntrada);
+    fclose(arqEntrada2);
+    fclose(arqIndice);
 
 }

@@ -16,6 +16,7 @@ void lerArquivo(FILE *arq, cabecalho *cab, Lista *lista);
 void imprimeRegistro (registro *regAux);
 
 void atualizarCab(FILE *arq, cabecalho *cab);
+char *pegarValorCampo(registro *reg, char *campo);
 
 // Funções de filtro
 int analisarCampo(filtro filtros, registro *reg);

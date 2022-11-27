@@ -339,3 +339,30 @@ int filtrar(cabecalho *cab, Lista *listaCompleta, filtro filtro){
     desalocarRegistro(&regAux);
     return flag;
 }
+
+//Função que pega o valor do campo de um registro
+char *pegarValorCampo(registro *reg, char *campo){
+    if (!strcmp(campo, "idConecta")){
+        char *idConecta = (char *) malloc(sizeof(char) * 10);
+        sprintf(idConecta, "%d", reg->idConecta);
+        return idConecta;
+    } else if (!strcmp(campo, "siglaPais")){
+        return reg->siglaPais;
+    } else if (!strcmp(campo, "idPoPsConectado")){
+        char *idPoPsConectado = (char *) malloc(sizeof(char) * 10);
+        sprintf(idPoPsConectado, "%d", reg->idPoPsConec);
+        return idPoPsConectado;
+    } else if (!strcmp(campo, "unidadeMedida")){
+        return reg->undMedida;
+    } else if (!strcmp(campo, "velocidade")){
+        char *velocidade = (char *) malloc(sizeof(char) * 10);
+        sprintf(velocidade, "%d", reg->veloc);
+        return velocidade;
+    } else if (!strcmp(campo, "nomePoPs")){
+        return reg->nomePoPs;
+    } else if (!strcmp(campo, "nomePais")){
+        return reg->nomePais;
+    } else {
+        return NULL;
+    }
+}

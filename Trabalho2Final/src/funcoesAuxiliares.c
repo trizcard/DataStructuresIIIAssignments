@@ -69,3 +69,31 @@ void converterInt(int *campo, int flagNulo, char *valor){
         *campo = atoi(valor);
     }
 }
+
+//Abre o arquivo de entrada e verifica se ele está consistente
+FILE* abrirArquivo(char nomeArq[25], char modo[2]){
+    FILE *arqEntrada;
+    arqEntrada = fopen(nomeArq, modo);
+    if(arqEntrada == NULL){
+        printf("Falha no carregamento do arquivo.\n");
+        return NULL;
+    }
+
+    //Verifica inconsistencias no arquivo de entrada
+    char status;
+    fread(&status, sizeof(char), 1, arqEntrada);
+    if(status == '0'){
+        printf("Falha no processamento do arquivo.\n");
+        fclose(arqEntrada);
+        return NULL;
+    }
+    return arqEntrada;
+}
+
+//Verificar se campo de busca é idConect (se é a chave)
+int verificarChave(char campo[20]){
+    if(strcmp(campo, "idConecta") == 0){
+        return 1;
+    }
+    return 0;
+}

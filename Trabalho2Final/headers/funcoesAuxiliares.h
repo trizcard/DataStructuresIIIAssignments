@@ -18,3 +18,5 @@ int pegarRRNencadeado(FILE* arqSaida, int RRN);
 void verificaCampoNulo(char* campo, void *campoReg, int flagInt);
 void adicionarCampoVariavel(FILE *arqSaida, char *campo);
 void converterInt(int *campo, int flagNulo, char *valor);
+FILE* abrirArquivo(char nomeArq[25], char modo[2]);
+int verificarChave(char campo[20]);
