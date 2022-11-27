@@ -339,3 +339,47 @@ int filtrar(cabecalho *cab, Lista *listaCompleta, filtro filtro){
     desalocarRegistro(&regAux);
     return flag;
 }
+
+//Função que pega o valor do campo de um registro
+char *pegarValorCampo(registro *reg, char *campo){
+    if (!strcmp(campo, "idConecta")){
+        char *idConecta = (char *) malloc(sizeof(char) * 10);
+        sprintf(idConecta, "%d", reg->idConecta);
+        return idConecta;
+    } else if (!strcmp(campo, "siglaPais")){
+        return reg->siglaPais;
+    } else if (!strcmp(campo, "idPoPsConectado")){
+        char *idPoPsConectado = (char *) malloc(sizeof(char) * 10);
+        sprintf(idPoPsConectado, "%d", reg->idPoPsConec);
+        return idPoPsConectado;
+    } else if (!strcmp(campo, "unidadeMedida")){
+        return reg->undMedida;
+    } else if (!strcmp(campo, "velocidade")){
+        char *velocidade = (char *) malloc(sizeof(char) * 10);
+        sprintf(velocidade, "%d", reg->veloc);
+        return velocidade;
+    } else if (!strcmp(campo, "nomePoPs")){
+        return reg->nomePoPs;
+    } else if (!strcmp(campo, "nomePais")){
+        return reg->nomePais;
+    } else {
+        return NULL;
+    }
+}
+
+//Função imprimir registros do join
+void imprimeJoin(registro *reg1, registro *reg2){
+    if (reg1->idConecta != 0){
+        printf("Identificador do ponto: %d\n", reg1->idConecta);
+    }
+    printf("Nome do ponto: %s\n", reg1->nomePoPs);
+    printf("Pais de localizacao: %s\n", reg1->nomePais);
+    printf("Sigla do pais: %s\n", reg1->siglaPais);
+    printf("Identificador do ponto conectado: %d\n", reg1->idPoPsConec);
+    
+    printf("Nome do ponto conectado: %s\n", reg2->nomePoPs);
+    printf("Nome do pais conectado: %s\n",reg2->nomePais );
+    printf("Sigla do pais: %s\n", reg2->siglaPais);
+    printf("Velocidade de transmissao: %d %sbps\n", reg2->veloc, reg2->undMedida);
+    printf("\n");
+}

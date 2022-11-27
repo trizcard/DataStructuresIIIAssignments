@@ -14,6 +14,9 @@ int main() {
     scanf("%d ", &func); // seleciona funcao
     fscanf(stdin, "%s", nomeArq); // nome do arquivo
     char nomeArq2[25];
+    char nomeArq3[25];
+    char nomeCampo1[25];
+    char nomeCampo2[25];
     int n;
 
     // chama a funcao a ser executada
@@ -46,7 +49,8 @@ int main() {
             break;
 */
         case 7:
-            //funcSETE(nomeArq,nomeArq2);
+            fscanf(stdin, "%s", nomeArq2); // nome do arquivo
+            funcSETE(nomeArq,nomeArq2);
             break;
         
         case 8:
@@ -59,5 +63,14 @@ int main() {
             scanf("%d", &n);
             funcNOVE(nomeArq, nomeArq2, n);
             break;
+        case 10:
+            fscanf(stdin, "%s", nomeArq2); // nome do arquivo 2
+            scanf("%d", &n);
+            //entrada do campo do arq 1 e 2
+            fscanf(stdin, "%s", nomeCampo1);
+            fscanf(stdin, "%s", nomeCampo2);
+            //entrada do nome do arquivo de indice
+            fscanf(stdin, "%s", nomeArq3);
+            funcDEZ(nomeArq, nomeArq2, nomeCampo1, nomeCampo2, nomeArq3);
     }
 }
