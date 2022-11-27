@@ -130,6 +130,18 @@ int buscarPagina(no pagAtual, int chave, int *PosiAchada){
     return 0;
 }
 
+int criaRaiz(FILE *arq, int chave, int RRNchave, int esq, int dir){
+    no pagRaiz;
+    inicializarArv(&pagRaiz);
+    pagRaiz.nroChavesNo = 1;
+    pagRaiz.CP[0].c = chave;
+    pagRaiz.CP[0].Pr = RRNchave;
+    pagRaiz.P[0] = esq;
+    pagRaiz.P[1] = dir;
+    alterarNo(arq, pagRaiz, 0);
+    return pagRaiz.RRNdoNo;
+}
+
 int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido, cabecalhoArv *cabArv){
     no pagAtual, pagProx;
 
@@ -165,7 +177,9 @@ int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Pr
     }
     else {
         (*cabArv).RRNproxNo++;
-        (*cabArv).alturaArvore++;
+        if(pagAtual.RRNdoNo == (*cabArv).noRaiz){
+            (*cabArv).alturaArvore++;
+        }
         split(PromB, &pagAtual, Promovido, &pagProx);
         alterarNo(arq, &pagAtual, RRNarv);
         alterarNo(arq, &pagProx, Promovido->filho);
