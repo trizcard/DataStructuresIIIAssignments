@@ -200,7 +200,13 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
         prom.chave = -1;
         prom.RRN = -1;
         prom.filho = -1; 
-        inserirArvore(arqArvore, regAux.idConecta, RRN, cabArv.noRaiz, &prom, &cabArv);
+        int promovido;
+
+        promovido = inserirArvore(arqArvore, regAux.idConecta, RRN, cabArv.noRaiz, &prom, &cabArv);
+        if (promovido == 1){
+            cabArv.alturaArvore++;
+            cabArv.noRaiz = criaRaiz(arqArvore, &prom.chave, &prom.RRN, &cabArv.noRaiz, &prom.filho);
+        }
         cabArv.nroChavesTotal++;
 
         float qtdRegPag = 960/64;

@@ -142,7 +142,7 @@ int criaRaiz(FILE *arq, int chave, int RRNchave, int esq, int dir){
     return pagRaiz.RRNdoNo;
 }
 
-int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido, cabecalhoArv *cabArv){
+int inserirArv(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido, cabecalhoArv *cabArv){
     no pagAtual, pagProx;
 
     int promovido; // 1 se houve promocao, 0 se nao houve
@@ -177,9 +177,6 @@ int inserirArvore(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Pr
     }
     else {
         (*cabArv).RRNproxNo++;
-        if(pagAtual.RRNdoNo == (*cabArv).noRaiz){
-            (*cabArv).alturaArvore++;
-        }
         split(PromB, &pagAtual, Promovido, &pagProx);
         alterarNo(arq, &pagAtual, RRNarv);
         alterarNo(arq, &pagProx, Promovido->filho);
