@@ -213,6 +213,7 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
         prom.filho = -1; 
         int promovido;
 
+
         promovido = inserirArv(arqArvore, regAux.idConecta, RRN, cabArv.noRaiz, &prom, &cabArv);
         if (promovido == 1){
             cabArv.alturaArvore++;

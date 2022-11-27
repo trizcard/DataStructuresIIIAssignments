@@ -12,7 +12,9 @@ int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAcha
 int buscarPagina(no pagAtual, int chave, int *PosiAchada);
 int filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo);
 int criaRaiz(FILE *arq, int chave, int RRNchave, int esq, int dir);
+
 int inserirArv(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido, cabecalhoArv *cabArv);
+
 void split(promovidos PromB, no *pagAntiga, promovidos *Promovido, no *pagNova);
 void inserirNo(no *pagAtual, promovidos PromB);
 void alterarNo(FILE *arq, no *pagAtual, int RRNarv);
