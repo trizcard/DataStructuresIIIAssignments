@@ -4,7 +4,7 @@
 void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
      //abrir o arquivo de entrada
     FILE *arqEntrada;
-    arqEntrada = fopen(nomeArq, "wb");
+    arqEntrada = fopen(nomeArq, "rb");
     if(arqEntrada == NULL){
         printf("Falha no carregamento do arquivo.\n");
         return;
@@ -18,7 +18,7 @@ void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
         fclose(arqEntrada);
         return;
     }
-    
+
     // altera status do arquivo para 0
     fseek(arqEntrada, 0, SEEK_SET);
     status = '0';
@@ -32,21 +32,33 @@ void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
     }
     //Criar o cabecalho do arquivo de indice
     cabecalhoArv cabIndice;
-    criarCabecalhoIndice(&cabIndice);
+    criarCabArqIndice(arqIndice, &cabIndice);
     //Adicionar dados arquivo de entrada ao arquivo de indice
     //percorrer arquivo de entrada
-    fseek(arqEntrada, 960, SEEK_SET);
     int RRN = 0;
     int qtdRRN = pegarRRN(arqEntrada);
+    fseek(arqEntrada, 960, SEEK_SET);//Pular o cabecalho
     while(RRN < qtdRRN){
         //criar o registro
         registro reg;
         //Inicializar Registro
-        inicializarRegistro(&reg);
+        alocaRegistro(&reg);
         //Pegar o registro do arquivo de entrada
         if(lerRegistro(arqEntrada, &reg)){
             //Adicionar o registro no arquivo de indice
-                //adicionarRegArqIndice(arqIndice, &reg, RRN);
+            promovidos prom;
+            prom.chave = -1;
+            prom.RRN = -1;
+            prom.filho = -1; 
+            int promovido;
+
+            promovido = inserirArv(arqIndice, reg.idConecta, RRN, cabIndice.noRaiz, &prom, &cabIndice);
+            if (promovido == 1){
+                cabIndice.alturaArvore = 1;
+                cabIndice.noRaiz = criaRaiz(arqIndice, prom.chave, prom.RRN, cabIndice.noRaiz, prom.filho);
+            }
+            cabIndice.nroChavesTotal++;
+
         }
         //Desalocar variaveis   
         desalocarRegistro(&reg);
@@ -60,9 +72,14 @@ void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
     fseek(arqEntrada, 0, SEEK_SET);
     status = '1';
     fwrite(&status, sizeof(char), 1, arqEntrada);
+
+    
+
     //Fechar o arquivo de entrada e de indice
     fclose(arqEntrada);
     fclose(arqIndice);
+
+    binarioNaTela(nomeArqIndice);
 }
 
 
@@ -128,7 +145,6 @@ void funcOITO(char nomeArq[25], char nomeArqDados[25], int n){
 
 
 void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
-    /*
     FILE *arq;
     arq = fopen(nomeArq, "rb+");
     if (arq == NULL){
@@ -200,7 +216,7 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
         promovido = inserirArv(arqArvore, regAux.idConecta, RRN, cabArv.noRaiz, &prom, &cabArv);
         if (promovido == 1){
             cabArv.alturaArvore++;
-            cabArv.noRaiz = criaRaiz(arqArvore, &prom.chave, &prom.RRN, &cabArv.noRaiz, &prom.filho);
+            cabArv.noRaiz = criaRaiz(arqArvore, prom.chave, prom.RRN, cabArv.noRaiz, prom.filho);
         }
         cabArv.nroChavesTotal++;
 
@@ -222,7 +238,6 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
     fclose(arqArvore);
     binarioNaTela(nomeArq);
     binarioNaTela(nomeArqDados);
-    */
 }
 
 
@@ -257,12 +272,9 @@ void funcDEZ(char nomeArq1[25], char nomeArq2[25],char nomeCampoArq1[25], char n
     int RRN = 0;
     int qtdRRN = pegarRRN(arqEntrada);
     fseek(arqEntrada, 960, SEEK_SET);//Pular o cabecalho
-    int i = 0;
+   
 
     while(RRN < qtdRRN){
-        if(i > 6){
-            break;
-        }
         //criar o registro
         registro reg;
 
@@ -305,18 +317,11 @@ void funcDEZ(char nomeArq1[25], char nomeArq2[25],char nomeCampoArq1[25], char n
                 pagAcessadas++; // acesso a pagina do registro
                 lerRegistro(arqEntrada2, &reg2);
     
-
-                
                 //Imprimir o registro
-                imprimeRegistro(&reg);
-                imprimeRegistro(&reg2);
-                
-                
-                
+                imprimeJoin(&reg, &reg2);                
 
                 //Desalocar Registros 
-                desalocarRegistro(&reg2);
-                             
+                desalocarRegistro(&reg2);          
                }                            
             }else{
                 //Fazer busca sequencial no arquivo de entrada 2
@@ -326,8 +331,6 @@ void funcDEZ(char nomeArq1[25], char nomeArq2[25],char nomeCampoArq1[25], char n
                 strcpy(fil.nomeCampo, nomeCampoArq2);
                 //Copiar o 
                 strcpy(fil.valorCampo, valorCampo);
-
-                
 
                 //Percorrer o arquivo de entrada 2
                 int RRN = 0;
@@ -346,8 +349,7 @@ void funcDEZ(char nomeArq1[25], char nomeArq2[25],char nomeCampoArq1[25], char n
                         //Verificar se o registro tem o valor do campo
                         if (analisarCampo(fil, &reg2)){
                             //Imprimir o registro
-                            imprimeRegistro(&reg);
-                            imprimeRegistro(&reg2);
+                            imprimeJoin(&reg, &reg2);
                         }
                     }
                     //Desalocar o registro
@@ -365,7 +367,6 @@ void funcDEZ(char nomeArq1[25], char nomeArq2[25],char nomeCampoArq1[25], char n
         desalocarRegistro(&reg);
 
         RRN++;
-        i++;
     }
 
 

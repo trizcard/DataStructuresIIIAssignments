@@ -1,6 +1,33 @@
 #include "funcoesIndex.h"
 
 
+//Função de inicializar cabecalho
+void inicializaCabecalho(cabecalhoArv *cab){
+    cab->status = '0';
+    cab->noRaiz = -1;
+    cab->nroChavesTotal = 0;
+    cab->alturaArvore = 0;
+    cab->RRNproxNo = 0;
+    cab->lixo = (char*)malloc(49*sizeof(char));
+    addLixo(cab->lixo, 0, 49);
+}
+
+
+
+//Função criar cabeçalho arquio de índice
+void criarCabArqIndice(FILE *arqIndice, cabecalhoArv *cabArv){
+    //Inicializa cabeçalho
+    inicializaCabecalho(cabArv);
+    //Escreve cabeçalho no arquivo
+    fwrite(&cabArv->status, sizeof(char), 1, arqIndice);
+    fwrite(&cabArv->noRaiz, sizeof(int), 1, arqIndice);
+    fwrite(&cabArv->nroChavesTotal, sizeof(int), 1, arqIndice);
+    fwrite(&cabArv->alturaArvore, sizeof(int), 1, arqIndice);
+    fwrite(&cabArv->RRNproxNo, sizeof(int), 1, arqIndice);
+    fwrite(cabArv->lixo, sizeof(char), 49, arqIndice);
+    free(cabArv->lixo);
+}
+
 void lerPgDados(FILE *arqDados, no *arvore){
     // Lê uma página de dados da árvore-B
     fread(&arvore->folha, sizeof(char), 1, arqDados);
@@ -97,17 +124,17 @@ int filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo){
 // RRNarv -> RRN da pagina atual da arvore 
 
 void inicializarArv(no *pagArv){
-    (*pagArv).folha = '1';
-    (*pagArv).nroChavesNo = 0;
-    (*pagArv).alturaNo = 0;
-    (*pagArv).RRNdoNo = 0;
-
-    for(int i = 0; i < MAX_CHAVE; i++){
-        (*pagArv).P[i] = -1;
-        (*pagArv).CP[i].c = -1;
-        (*pagArv).CP[i].Pr = -1;
+    // Inicializa uma página da árvore-B
+    pagArv->folha = '1';
+    pagArv->nroChavesNo = 0;
+    pagArv->alturaNo = 0;
+    pagArv->RRNdoNo = 0;
+    for(int i = 0; i < (MAX_CHAVE); i++){
+        pagArv->P[i] = -1;
+        pagArv->CP[i].c = -1;
+        pagArv->CP[i].Pr = -1;
     }
-    (*pagArv).P[MAX_CHAVE] = -1;
+    pagArv->P[(MAX_CHAVE)] = -1;
 }
 
 void atualizarCabArv(FILE *arqArvore, cabecalhoArv *cabArv){
@@ -143,6 +170,33 @@ int criaRaiz(FILE *arq, int chave, int RRNchave, int esq, int dir){
     return pagRaiz.RRNdoNo;
 }
 
+//Função de imprimir a árvores B
+void imprimeArvoreB(FILE* arquivo, cabecalhoArv* c){
+    no n;
+    for (int i = 0; i < c->nroChavesTotal; i++){
+        fseek(arquivo, i*TAMANHO_REG_DADOS + 65, SEEK_SET);
+        lerPgDados( arquivo, &n);
+        if(n.RRNdoNo >= 0){
+            imprimeNo(&n);
+        }
+    }
+}
+
+void imprimeNo (no* n) {
+    if(n != NULL){
+        printf("folha: %c, nroChavesNo: %d, alturaNo: %d, RRNdoNo: %d, descendentes: ", n->folha, n->nroChavesNo, n->alturaNo, n->RRNdoNo);
+        for (int i = 0; i < ORDEM; i++) {
+            printf("%d ", n->P[i]);
+        }
+        printf(", dados: ");
+        for (int i = 0; i < ORDEM - 1; i++) {
+            printf("%d (%d) ", n->CP[i].c, n->CP[i].Pr);
+        }
+        printf("\n");
+    }
+}
+
+
 int inserirArv(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido, cabecalhoArv *cabArv){
     no pagAtual, pagProx;
 
@@ -158,6 +212,36 @@ int inserirArv(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promo
         Promovido->filho = -1;
         return 1;
     }
+     //Verificar se o nó raiz está cheio
+    if (RRNarv == cabArv->noRaiz){//Acabou recursão se chega nesse caso
+        //Fazer split da raiz chamando a função de split
+        //Pegar no raiz
+        no noRaizAntigo;
+        fseek(arq, (RRNarv * TAMANHO_REG_DADOS) + 960, SEEK_SET);
+        lerPgDados(arq, &noRaizAntigo);
+
+        //Pegar pagina de no raiz antigo
+        no noRaiz;
+
+        //Mudar altura após criar nova raiz
+        noRaizAntigo.alturaNo++;      
+
+        //Settar valor do no raiz
+      
+        noRaiz.nroChavesNo = 1;
+        noRaiz.folha = '0';
+        noRaiz.alturaNo = noRaizAntigo.alturaNo + 1;
+
+        split(PromB, &noRaizAntigo, Promovido, &noRaiz);
+        noRaiz.RRNdoNo = cabArv->RRNproxNo; //RRN do no raiz
+
+        //Atualizar cabeçalho
+        cabArv->noRaiz = noRaiz.RRNdoNo;
+        cabArv->RRNproxNo = cabArv->RRNproxNo + 1;
+        cabArv->alturaArvore = noRaiz.alturaNo;
+        return 0;
+    }
+    
     fseek(arq, ((RRNarv+1) * TAMANHO_REG_DADOS), SEEK_SET);
     lerPgDados(arq, &pagAtual);
 
@@ -183,6 +267,8 @@ int inserirArv(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promo
         alterarNo(arq, &pagProx, Promovido->filho);
         return 1; // com promoção
     }
+
+    
 }
 
 void split(promovidos PromB, no *pagAntiga, promovidos *Promovido, no *pagNova){

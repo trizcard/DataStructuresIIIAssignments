@@ -366,3 +366,20 @@ char *pegarValorCampo(registro *reg, char *campo){
         return NULL;
     }
 }
+
+//Função imprimir registros do join
+void imprimeJoin(registro *reg1, registro *reg2){
+    if (reg1->idConecta != 0){
+        printf("Identificador do ponto: %d\n", reg1->idConecta);
+    }
+    printf("Nome do ponto: %s\n", reg1->nomePoPs);
+    printf("Pais de localizacao: %s\n", reg1->nomePais);
+    printf("Sigla do pais: %s\n", reg1->siglaPais);
+    printf("Identificador do ponto conectado: %d\n", reg1->idPoPsConec);
+    
+    printf("Nome do ponto conectado: %s\n", reg2->nomePoPs);
+    printf("Nome do pais conectado: %s\n",reg2->nomePais );
+    printf("Sigla do pais: %s\n", reg2->siglaPais);
+    printf("Velocidade de transmissao: %d %sbps\n", reg2->veloc, reg2->undMedida);
+    printf("\n");
+}

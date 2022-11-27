@@ -22,3 +22,6 @@ char *pegarValorCampo(registro *reg, char *campo);
 int analisarCampo(filtro filtros, registro *reg);
 void lerFiltros(filtro *filtros, int n);
 int filtrar(cabecalho *cab, Lista *listaCompleta, filtro filtro);
+
+
+void imprimeJoin(registro *reg1, registro *reg2);

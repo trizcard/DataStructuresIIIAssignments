@@ -49,7 +49,8 @@ int main() {
             break;
 */
         case 7:
-            //funcSETE(nomeArq,nomeArq2);
+            fscanf(stdin, "%s", nomeArq2); // nome do arquivo
+            funcSETE(nomeArq,nomeArq2);
             break;
         
         case 8:
