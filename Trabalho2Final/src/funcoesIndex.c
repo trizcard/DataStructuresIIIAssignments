@@ -158,6 +158,14 @@ int buscarPagina(no pagAtual, int chave, int *PosiAchada){
     return 0;
 }
 
+//Função pega próximo RRN do cabeçalho da arvore
+int getRRNproxNo(FILE *arqArvore){
+    int RRNproxNo;
+    fseek(arqArvore, 5, SEEK_SET);
+    fread(&RRNproxNo, sizeof(int), 1, arqArvore);
+    return RRNproxNo;
+}
+
 int criaRaiz(FILE *arq, int chave, int RRNchave, int esq, int dir){
     no pagRaiz;
     inicializarArv(&pagRaiz);
@@ -166,7 +174,8 @@ int criaRaiz(FILE *arq, int chave, int RRNchave, int esq, int dir){
     pagRaiz.CP[0].Pr = RRNchave;
     pagRaiz.P[0] = esq;
     pagRaiz.P[1] = dir;
-    alterarNo(arq, &pagRaiz, 0);
+    int RRNproxNo = getRRNproxNo(arq);
+    alterarNo(arq, &pagRaiz, RRNproxNo); 
     return pagRaiz.RRNdoNo;
 }
 
@@ -342,9 +351,9 @@ void alterarNo(FILE *arq, no *pagAtual, int RRNarv){
     fwrite(&pagAtual->alturaNo, sizeof(int), 1, arq);
     fwrite(&pagAtual->RRNdoNo, sizeof(int), 1, arq);
     for (int i = 0; i < MAX_CHAVE; i++){
+        fwrite(&pagAtual->P[i], sizeof(int), 1, arq);
         fwrite(&pagAtual->CP[i].c, sizeof(int), 1, arq);
         fwrite(&pagAtual->CP[i].Pr, sizeof(int), 1, arq);
-        fwrite(&pagAtual->P[i], sizeof(int), 1, arq);
     }
     fwrite(&pagAtual->P[pagAtual->nroChavesNo], sizeof(int), 1, arq);
 }

@@ -11,6 +11,7 @@ void atualizarCabArv(FILE *arqArvore, cabecalhoArv *cabArv);
 int buscarArvore(FILE *arq, int RRNarv, int chave, int *RRNachado, int *PosiAchada, int pagAcessadas);
 int buscarPagina(no pagAtual, int chave, int *PosiAchada);
 int filtrarChave(FILE *arq, FILE *arqDados, char *valorCampo);
+int getRRNproxNo(FILE *arqArvore);
 int criaRaiz(FILE *arq, int chave, int RRNchave, int esq, int dir);
 
 int inserirArv(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promovido, cabecalhoArv *cabArv);
