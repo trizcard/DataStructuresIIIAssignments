@@ -245,48 +245,17 @@ void funcNOVE(char nomeArq[25], char nomeArqDados[25], int n){
 
 
 void funcDEZ(char nomeArq1[25], char nomeArq2[25],char nomeCampoArq1[25], char nomeCampoArq2[25], char nomeArqIndex[25]){
-    /*
-    //Abrir o arquivo de entrada 1
+  //Abrir o arquivo de entrada 1
     FILE *arqEntrada;
-    arqEntrada = fopen(nomeArq1, "rb");
-    if(arqEntrada == NULL){
-        printf("Falha no carregamento do arquivo.\n");
-        return NULL;
-    }
-
-    //Verifica inconsistencias no arquivo de entrada
-    char status;
-    fread(&status, sizeof(char), 1, arqEntrada);
-    if(status == '0'){
-        printf("Falha no processamento do arquivo.\n");
-        fclose(arqEntrada);
-        return NULL;
-    }
+    arqEntrada = abrirArquivo(nomeArq1, "rb");
 
     //Abrir o arquivo de entrada 2
     FILE *arqEntrada2;
-    arqEntrada2 = fopen(nomeArq2, "rb");
-    if(arqEntrada2 == NULL){
-        printf("Falha no carregamento do arquivo.\n");
-        return NULL;
-    }
-
-    //Verifica inconsistencias no arquivo de entrada
-    char status;
-    fread(&status, sizeof(char), 1, arqEntrada);
-    if(status == '0'){
-        printf("Falha no processamento do arquivo.\n");
-        fclose(arqEntrada);
-        return NULL;
-    }
+    arqEntrada2 = abrirArquivo(nomeArq2, "rb");
 
     //Abrir o arquivo de indice
     FILE *arqIndice;
     arqIndice = abrirArquivo(nomeArqIndex, "rb");
-    if (arqIndice == NULL){
-        printf("Falha no processamento do arquivo.\n");
-        return;
-    }
 
     //Percore o arquivo de entrada
     int RRN = 0;
@@ -394,6 +363,6 @@ void funcDEZ(char nomeArq1[25], char nomeArq2[25],char nomeCampoArq1[25], char n
     fclose(arqEntrada);
     fclose(arqEntrada2);
     fclose(arqIndice);
-    */
+
 
 }
