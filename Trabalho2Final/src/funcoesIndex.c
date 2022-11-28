@@ -137,15 +137,7 @@ void inicializarArv(no *pagArv){
     pagArv->P[(MAX_CHAVE)] = -1;
 }
 
-void atualizarCabArv(FILE *arqArvore, cabecalhoArv *cabArv){
-    fseek(arqArvore, 0, SEEK_SET);
-    fwrite(&cabArv->status, sizeof(char), 1, arqArvore);
-    fwrite(&cabArv->noRaiz, sizeof(int), 1, arqArvore);
-    fwrite(&cabArv->nroChavesTotal, sizeof(int), 1, arqArvore);
-    fwrite(&cabArv->alturaArvore, sizeof(int), 1, arqArvore);
-    fwrite(&cabArv->RRNproxNo, sizeof(int), 1, arqArvore);
-    fwrite(cabArv->lixo, sizeof(char), 48, arqArvore);
-}
+
 
 int buscarPagina(no pagAtual, int chave, int *PosiAchada){
     for (int i = 0; i < pagAtual.nroChavesNo && chave < pagAtual.CP[i].c; i++){
@@ -158,10 +150,18 @@ int buscarPagina(no pagAtual, int chave, int *PosiAchada){
     return 0;
 }
 
+//Função de incrementar o proximo RRN da arvore
+void incrementarRRNarv(FILE *arqArvore){
+    int RRN = getRRNproxNo(arqArvore);
+    RRN++;
+    fseek(arqArvore, 9, SEEK_SET);
+    fwrite(&RRN, sizeof(int), 1, arqArvore);
+}
+
 //Função pega próximo RRN do cabeçalho da arvore
 int getRRNproxNo(FILE *arqArvore){
     int RRNproxNo;
-    fseek(arqArvore, 5, SEEK_SET);
+    fseek(arqArvore, 9, SEEK_SET);
     fread(&RRNproxNo, sizeof(int), 1, arqArvore);
     return RRNproxNo;
 }
@@ -176,6 +176,7 @@ int criaRaiz(FILE *arq, int chave, int RRNchave, int esq, int dir){
     pagRaiz.P[1] = dir;
     int RRNproxNo = getRRNproxNo(arq);
     alterarNo(arq, &pagRaiz, RRNproxNo); 
+    incrementarRRNarv(arq);
     return pagRaiz.RRNdoNo;
 }
 
@@ -203,6 +204,17 @@ void imprimeNo (no* n) {
         }
         printf("\n");
     }
+}
+
+//Função para atualizar cabeçalho da árvore B
+void atualizarCabArv(FILE *arqArvore, cabecalhoArv *cabArv){
+    fseek(arqArvore, 0, SEEK_SET);
+    fwrite(&cabArv->status, sizeof(char), 1, arqArvore);
+    fwrite(&cabArv->noRaiz, sizeof(int), 1, arqArvore);
+    fwrite(&cabArv->nroChavesTotal, sizeof(int), 1, arqArvore);
+    fwrite(&cabArv->alturaArvore, sizeof(int), 1, arqArvore);
+    fwrite(&cabArv->RRNproxNo, sizeof(int), 1, arqArvore);
+    fwrite(cabArv->lixo, sizeof(char), 48, arqArvore);
 }
 
 
@@ -248,6 +260,7 @@ int inserirArv(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promo
         cabArv->noRaiz = noRaiz.RRNdoNo;
         cabArv->RRNproxNo = cabArv->RRNproxNo + 1;
         cabArv->alturaArvore = noRaiz.alturaNo;
+        atualizarCabArv(arq, cabArv);
         return 0;
     }
     

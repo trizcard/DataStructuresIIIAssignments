@@ -380,6 +380,6 @@ void imprimeJoin(registro *reg1, registro *reg2){
     printf("Nome do ponto conectado: %s\n", reg2->nomePoPs);
     printf("Nome do pais conectado: %s\n",reg2->nomePais );
     printf("Sigla do pais: %s\n", reg2->siglaPais);
-    printf("Velocidade de transmissao: %d %sbps\n", reg2->veloc, reg2->undMedida);
+    printf("Velocidade de transmissao: %d %sbps\n", reg1->veloc, reg1->undMedida);
     printf("\n");
 }

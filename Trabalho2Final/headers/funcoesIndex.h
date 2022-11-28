@@ -27,3 +27,4 @@ Dado buscarDado(FILE *arqDados, int RRN, int posi);
 void imprimeArvoreB(FILE* arquivo, cabecalhoArv* c);
 void imprimeNo (no* n);
 
+void incrementarRRNarv(FILE *arqArvore);
