@@ -234,35 +234,7 @@ int inserirArv(FILE *arq, int chave, int RRNchave, int RRNarv, promovidos *Promo
         return 1;
     }
      //Verificar se o nó raiz está cheio
-    if (RRNarv == cabArv->noRaiz){//Acabou recursão se chega nesse caso
-        //Fazer split da raiz chamando a função de split
-        //Pegar no raiz
-        no noRaizAntigo;
-        fseek(arq, (RRNarv * TAMANHO_REG_DADOS) + 960, SEEK_SET);
-        lerPgDados(arq, &noRaizAntigo);
-
-        //Pegar pagina de no raiz antigo
-        no noRaiz;
-
-        //Mudar altura após criar nova raiz
-        noRaizAntigo.alturaNo++;      
-
-        //Settar valor do no raiz
-      
-        noRaiz.nroChavesNo = 1;
-        noRaiz.folha = '0';
-        noRaiz.alturaNo = noRaizAntigo.alturaNo + 1;
-
-        split(PromB, &noRaizAntigo, Promovido, &noRaiz);
-        noRaiz.RRNdoNo = cabArv->RRNproxNo; //RRN do no raiz
-
-        //Atualizar cabeçalho
-        cabArv->noRaiz = noRaiz.RRNdoNo;
-        cabArv->RRNproxNo = cabArv->RRNproxNo + 1;
-        cabArv->alturaArvore = noRaiz.alturaNo;
-        atualizarCabArv(arq, cabArv);
-        return 0;
-    }
+    
     
     fseek(arq, ((RRNarv+1) * TAMANHO_REG_DADOS), SEEK_SET);
     lerPgDados(arq, &pagAtual);

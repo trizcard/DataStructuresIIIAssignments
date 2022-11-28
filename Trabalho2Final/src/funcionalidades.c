@@ -25,7 +25,7 @@ void funcSETE(char nomeArq[25], char nomeArqIndice[25]){
     fwrite(&status, sizeof(char), 1, arqEntrada);   
     //Criar o arquivo de indice
     FILE *arqIndice;
-    arqIndice = fopen(nomeArqIndice, "wb");
+    arqIndice = fopen(nomeArqIndice, "wb+");
     if(arqIndice == NULL){
         printf("Falha no carregamento do arquivo.\n");
         return;
