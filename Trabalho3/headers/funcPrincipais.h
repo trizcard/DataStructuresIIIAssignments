@@ -1,5 +1,4 @@
-#include "funcAuxiliares.h"
-
+#include "funcGrafos.h"
 void lerCabecalho(FILE *arq, cabecalho *cab);
 void alocaRegistro(registro *reg);
 void desalocarRegistro(registro *reg);
