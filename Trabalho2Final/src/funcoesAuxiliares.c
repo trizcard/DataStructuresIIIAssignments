@@ -76,7 +76,7 @@ FILE* abrirArquivo(char nomeArq[25], char modo[2]){
     arqEntrada = fopen(nomeArq, modo);
     if(arqEntrada == NULL){
         printf("Falha no carregamento do arquivo.\n");
-        return NULL;
+        exit(0);
     }
 
     //Verifica inconsistencias no arquivo de entrada
@@ -85,7 +85,7 @@ FILE* abrirArquivo(char nomeArq[25], char modo[2]){
     if(status == '0'){
         printf("Falha no processamento do arquivo.\n");
         fclose(arqEntrada);
-        return NULL;
+        exit(0);
     }
     return arqEntrada;
 }
@@ -93,6 +93,22 @@ FILE* abrirArquivo(char nomeArq[25], char modo[2]){
 //Verificar se campo de busca é idConect (se é a chave)
 int verificarChave(char campo[20]){
     if(strcmp(campo, "idConecta") == 0){
+        return 1;
+    }
+    return 0;
+}
+
+//Função para verificar se campo int é -1
+int verificarInt(int campo){
+    if(campo == -1){
+        return 1;
+    }
+    return 0;
+}
+
+//Função para verificar se campo string é nulo
+int verificarString(char campo[20]){
+    if(strcmp(campo, "") == 0){
         return 1;
     }
     return 0;
