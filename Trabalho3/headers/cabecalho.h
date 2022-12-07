@@ -37,6 +37,7 @@ struct adjacencia{
 typedef struct adjacencia adjacencia;
 
 struct vertice{
+    registro reg;
     adjacencia *cab;
 };
 typedef struct vertice vertice;
