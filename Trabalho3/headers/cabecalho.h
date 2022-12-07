@@ -28,3 +28,22 @@ struct registro{
     char *nomePais;
 };
 typedef struct registro registro;
+
+struct adjacencia{
+    int vertice; // vertice de destino
+    int peso; // peso da aresta
+    adjacencia *prox; // proximo elemento da lista de adjacencia
+};
+typedef struct adjacencia adjacencia;
+
+struct vertice{
+    adjacencia *cab;
+};
+typedef struct vertice vertice;
+
+struct grafo{
+    int qtdA; // quantidade de arestas do grafo
+    int qtdV; // quantidade de vertices do grafo
+    vertice *adj; // arranjo de vertices
+};
+typedef struct grafo grafo;
