@@ -1,11 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "funcFornecidas.h"
-#include "funcPrincipais.h"
-#define LIXO '$'
+#ifndef __FUNCIONALIDADES_H__
+#define __FUNCIONALIDADES_H__
 
-void funcONZE(char nomeArquivo[25]);
-void funcDOZE(char nomeArquivo[25]);
-void funcTREZE(char nomeArquivo[25], int n);
-void funcQUATORZE(char nomeArquivo[25], int n);
+#include "../headers/estrutura.h"
+
+void comando11(char* );
+/*void comando12(char* );
+void comando13(char*,int);
+void comando14(char*,int);*/
+
+#endif

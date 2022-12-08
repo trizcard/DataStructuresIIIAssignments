@@ -1,4 +1,4 @@
-CC          := gcc
+CC          := g++
 DEBUG_FLAGS := -g3 -pedantic -Werror=implicit-function-declaration -fsanitize=address,undefined
 FLAGS       := -lm -Wall -Werror #$(DEBUG_FLAGS)
 
@@ -9,9 +9,7 @@ EXEC        := prog
 ZIP         := exercicio.zip
 
 # List of all expected $(BIN)/*.o
-ALL         := $(wildcard $(SRC)/*.c)
-ALL         := $(ALL:$(SRC)/%.c=$(BIN)/%.o)
-
+ALL         := $(wildcard $(SRC)/*.c $(SRC)/*.cpp)
 
 all: $(EXEC)
 
@@ -21,17 +19,11 @@ run: all
 	./$(EXEC)
 
 clean:
-	rm -f $(EXEC) $(BIN)/*.o
+	rm -f $(EXEC)
 
 zip:
 	rm -f $(ZIP)
-	zip $(ZIP) Makefile $(HEADERS)/*.h $(SRC)/*.c
+	zip $(ZIP) Makefile $(HEADERS)/*.h $(ALL)
 
 $(EXEC): $(ALL)
-	$(CC) -o $(EXEC) $(BIN)/*.o $(FLAGS)
-
-$(BIN)/%.o: $(SRC)/%.c $(BIN)
-	$(CC) -o $@ -c $< -I $(HEADERS) $(FLAGS)
-
-$(BIN):
-	mkdir -p $(BIN)
+	$(CC) -o $(EXEC) $(ALL) $(FLAGS)

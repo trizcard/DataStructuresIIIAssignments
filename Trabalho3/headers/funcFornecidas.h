@@ -1,8 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#define LIXO '$'
+#ifndef __FORNECIDAS_H__
+#define __FORNECIDAS_H__
 
-void binarioNaTela(char *nomeArquivoBinario);
-void scan_quote_string(char *str);
+#include "../headers/estrutura.h"
+
+void binarioNaTela(char*);
+void scan_quote_string(char*);
+
+#endif

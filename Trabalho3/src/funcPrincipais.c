@@ -1,4 +1,4 @@
-#include "funcPrincipais.h"
+/*#include "funcPrincipais.h"
 
 // Função que lê o cabeçalho do arquivo de entrada
 void lerCabecalho(FILE *arq, cabecalho *cab){
@@ -78,3 +78,4 @@ void lerCampoVar(char *string, char *strPoPs, char *strPais){
     strPais[i-j] = '\0';
 }
 
+*/
