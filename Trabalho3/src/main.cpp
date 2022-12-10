@@ -33,11 +33,12 @@ int main() {
             scanf("%d", &n);
             comando13(nomeArq, n);
             break;
-        
+        */
         case 14:
-            canf("%d", &n);
+            int n;
+            scanf("%d", &n);
             comando14(nomeArq, n);
-            break;*/
+            break;
     }
     return 0;
 }

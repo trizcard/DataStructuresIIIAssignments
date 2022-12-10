@@ -2,6 +2,7 @@
 #include <set>
 #include <string>
 #include <iostream>
+#include <queue>
 #include "../headers/estrutura.h"
 #include "../headers/funcLeituraEscrita.h"
 #include "../headers/funcChecagem.h"
@@ -22,6 +23,7 @@ class Grafo{
 
     //função
         friend std::ostream& operator<<(std::ostream& os,const Grafo& grafo); 
+        int menor_caminho(int idOrigem, int idDestino);
 
 
 };
@@ -41,11 +43,11 @@ class No{
         No(int idConecta);
 
     //métodos
-        int pegar_idConecta() const;
-        //std::string pegar_nomePops() const;
-        //std::string pegar_nomePais() const;
-        //std::string pegar_siglaPais()const;
-        //const std::map<int,int>& pegar_lista_de_arestas() const;
+        int pegar_idConecta() const;/*
+        std::string pegar_nomePops() const;
+        std::string pegar_nomePais() const;
+        std::string pegar_siglaPais()const;*/
+        const std::map<int,int>& pegar_lista_de_arestas() const;
         void adicionar_aresta(int idPoPsConectado, int velocidade);
         void completar_no(const No& no_completo);
 

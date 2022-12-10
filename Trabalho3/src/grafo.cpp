@@ -28,6 +28,60 @@ void Grafo::adicionar_no(const No& no){
     }
 }
 
+int Grafo::menor_caminho(int idOrigem, int idDestino){/*
+    int distancia[lista_de_nos.size()];
+    int antecessores[lista_de_nos.size()];
+    bool visitados[lista_de_nos.size()];
+
+    std::priority_queue< pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>> > fila_de_prioridade;
+
+    // inica o vetor de distancias e visitados 
+    for (const auto& vertice: lista_de_nos){
+        distancia[vertice.first] = 10000000;
+        antecessores[vertice.first] = -1;
+        visitados[vertice.first] = false;
+    }
+
+    */
+    std::map<int,int> velocidade;
+    std::map<int,int> antecessores;
+    std::map<int,bool> visitados;
+    std::priority_queue<std::pair<int,int>,std::vector<std::pair<int,int>>,std::greater<std::pair<int,int>>> fila_de_prioridade;
+
+    for (const auto& vertice: lista_de_nos){
+        velocidade.insert({vertice.first,10000000});
+        antecessores.insert({vertice.first,-1});
+        visitados.insert({vertice.first,false});
+    }
+
+    velocidade.at(idOrigem) = 0;
+    fila_de_prioridade.push({0,idOrigem});
+
+    while(!fila_de_prioridade.empty()){
+        int id_atual = fila_de_prioridade.top().second;
+        fila_de_prioridade.pop();
+
+        if(visitados.at(id_atual) == true){
+            continue;
+        }
+
+        visitados.at(id_atual) = true;
+
+        for (const auto& aresta: lista_de_nos.at(id_atual).pegar_lista_de_arestas()){
+            int id_adjacente = aresta.first;
+            int peso = aresta.second;
+
+            if(velocidade.at(id_adjacente) > velocidade.at(id_atual) + peso){
+                velocidade.at(id_adjacente) = velocidade.at(id_atual) + peso;
+                antecessores.at(id_adjacente) = id_atual;
+                fila_de_prioridade.push({velocidade.at(id_adjacente),id_adjacente});
+            }
+        }
+    }
+
+    return velocidade.at(idDestino);
+}
+
 std::ostream& operator<<(std::ostream& os,const Grafo& grafo){
     for (const auto& vertice: grafo.lista_de_nos){
         os<<vertice.second;
@@ -56,7 +110,7 @@ int No::pegar_idConecta() const {return idConecta;}
 //std::string No::pegar_nomePops() const{return nomePoPs;}
 //std::string No::pegar_nomePais() const{return nomePais;}
 //std::string No::pegar_siglaPais() const{return siglaPais;}
-//const std::map<int,int>& No::pegar_lista_de_arestas() const{return lista_de_arestas;}
+const std::map<int,int>& No::pegar_lista_de_arestas() const{return lista_de_arestas;}
 
 void No::adicionar_aresta(int idPoPsConectado, int velocidade){lista_de_arestas.insert({idPoPsConectado,velocidade});}
 
