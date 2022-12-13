@@ -6,6 +6,9 @@
 #include "../headers/estrutura.h"
 #include "../headers/funcLeituraEscrita.h"
 #include "../headers/funcChecagem.h"
+#define BRANCO 0
+#define AMARELO 1
+#define VERMELHO 2
 
 class No;
 
@@ -24,7 +27,9 @@ class Grafo{
     //função
         friend std::ostream& operator<<(std::ostream& os,const Grafo& grafo); 
         int menor_caminho(int idOrigem, int idDestino);
-
+        int qtd_vertices() const;
+        void busca_profundidade( int idOrigem,  std::map <int,int> cor, int *ciclos, int noOriginal ) const;
+        int cor_profundidade() const;
 
 };
 

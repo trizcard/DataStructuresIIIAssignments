@@ -25,15 +25,16 @@ int main() {
             comando11(nomeArq);
             break;
         
-       /* case 12:
+       case 12:
             comando12(nomeArq);
             break;
         
-        case 13:
+        /*  case 13:
             scanf("%d", &n);
             comando13(nomeArq, n);
             break;
         */
+       
         case 14:
             int n;
             scanf("%d", &n);

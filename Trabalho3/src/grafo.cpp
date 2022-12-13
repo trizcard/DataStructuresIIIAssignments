@@ -1,7 +1,5 @@
 #include "../headers/grafo.h"
 
-
-
 //grafos
 
 Grafo::Grafo(FILE* arquivo_entrada){
@@ -32,16 +30,13 @@ int Grafo::menor_caminho(int idOrigem, int idDestino){/*
     int distancia[lista_de_nos.size()];
     int antecessores[lista_de_nos.size()];
     bool visitados[lista_de_nos.size()];
-
     std::priority_queue< pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>> > fila_de_prioridade;
-
     // inica o vetor de distancias e visitados 
     for (const auto& vertice: lista_de_nos){
         distancia[vertice.first] = 10000000;
         antecessores[vertice.first] = -1;
         visitados[vertice.first] = false;
     }
-
     */
     std::map<int,int> velocidade;
     std::map<int,int> antecessores;
@@ -140,3 +135,56 @@ int calcula_velocidade(reg_dados* registro){
     else return registro->velocidade;
 
 }
+
+//Função pega a quantidade de vértices
+int Grafo ::qtd_vertices() const {
+    return lista_de_nos.size();
+}
+
+void Grafo::busca_profundidade( int idOrigem, std::map <int,int> cor, int *ciclos, int noOriginal) const {
+    //Marca o vértice que está como amarelo, que significa que ele foi visitado com map
+    cor[idOrigem] = AMARELO;
+
+    //Percorre todos os vértices adjacentes
+    for(const auto& aresta: lista_de_nos.at(idOrigem).pegar_lista_de_arestas()){
+        int id_adjacente = aresta.first;
+
+        //Se o vértice adjacente não foi visitado, chama a função recursivamente
+        if(cor[id_adjacente] == BRANCO){
+            busca_profundidade(id_adjacente, cor, ciclos, noOriginal);
+        }
+    }
+
+    //Verificar se é ciclo simples, ou seja, se o vértice adjacente é o vértice original
+    if(cor[idOrigem] != BRANCO && idOrigem == noOriginal){
+        *ciclos = *ciclos + 1;
+    }
+
+    //Marca o vértice como vermelho, que significa que ele foi visitado e todos os seus adjacentes também
+    cor[idOrigem] = VERMELHO;
+}
+
+//Função demarca cor da profundidade (O índice do vértice do arranjo adjacente em grafo será o mesmo do arranjo de cor)
+int Grafo:: cor_profundidade() const{
+    //int qtd_vertice = qtd_vertices();
+    std::map <int,int> cor;
+    //int cor[qtd_vertice];
+    int ciclos = 0;
+
+    //Marca todos os vértices como branco, que significa que eles não foram visitados no map de cor e colocar a posi dos vértices
+    for(const auto& vertice: lista_de_nos){
+        cor.insert({vertice.first, BRANCO});
+    }   
+    //imprimir chegou aqui
+    //Chama a função recursiva para todos os vértices com map
+    for(const auto& vertice: cor){
+        if(vertice.second == BRANCO){
+            busca_profundidade(vertice.first, cor, &ciclos, vertice.first);
+        }
+    std::cout<<"chegou aqui"<<std::endl;
+
+    }
+    
+    return ciclos;
+}
+
