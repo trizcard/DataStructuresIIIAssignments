@@ -27,99 +27,132 @@ void Grafo::adicionar_no(const No& no){
     }
 }
 
+// implementação do Algoritmo de Dijkstra para encontrar o menor caminho entre dois nós
 int Grafo::menor_caminho(int idOrigem, int idDestino){
-    std::map<int,int> velocidade;
-    std::map<int,int> antecessores;
-    std::map<int,bool> visitados;
-    std::priority_queue<std::pair<int,int>,std::vector<std::pair<int,int>>,std::greater<std::pair<int,int>>> fila_de_prioridade;
+    std::map<int,int> velocidade; // relaciona a velocidade ate o no
+    std::map<int,int> antecessores; // relaciona o antecessor ao no
+    std::map<int,bool> visitados; // indica se o no foi visitado ou nao (booleano)
 
+    // cria uma fila de prioridade que ordena os nos de acordo com a velocidade
+    std::priority_queue<std::pair<int,int>,std::vector<std::pair<int,int>>,std::greater<std::pair<int,int>>> pilha_de_prioridade;
+
+    // inicializa as velocidades, antecessores e visitados
     for (const auto& vertice: lista_de_nos){
-        velocidade.insert({vertice.first, INT_MAX});
-        antecessores.insert({vertice.first,-1});
-        visitados.insert({vertice.first,false});
+        velocidade.insert({vertice.first, INT_MAX}); // "infinita"
+        antecessores.insert({vertice.first,-1}); // nenhum antecessor
+        visitados.insert({vertice.first,false}); // nenhum no visitado
     }
 
+    // inicializa a velocidade do no de origem como 0 (dele até ele mesmo) e insere na pilha
     velocidade.at(idOrigem) = 0;
-    fila_de_prioridade.push({0,idOrigem});
+    pilha_de_prioridade.push({0,idOrigem});
 
-    while(!fila_de_prioridade.empty()){
-        int id_atual = fila_de_prioridade.top().second;
-        fila_de_prioridade.pop();
+    while(!pilha_de_prioridade.empty()){ // enquanto a pilha nao estiver vazia
+        // pega a segunda velocidade (a primeira é do nó até ele mesmo) da pilha
+        int no_atual = pilha_de_prioridade.top().second;
+        pilha_de_prioridade.pop();
 
-        if(visitados.at(id_atual) == true){
+        // se o no ja foi visitado, pula para o proximo
+        if(visitados.at(no_atual) == true){
             continue;
         }
 
-        visitados.at(id_atual) = true;
+        visitados.at(no_atual) = true;
 
-        for (const auto& aresta: lista_de_nos.at(id_atual).pegar_lista_de_arestas()){
-            int id_adjacente = aresta.first;
+        for (const auto& aresta: lista_de_nos.at(no_atual).pegar_lista_de_arestas()){ // para cada aresta do no atual
+            int no_adjacente = aresta.first; 
             int peso = aresta.second;
 
-            if(velocidade.at(id_adjacente) > velocidade.at(id_atual) + peso){
-                velocidade.at(id_adjacente) = velocidade.at(id_atual) + peso;
-                antecessores.at(id_adjacente) = id_atual;
-                fila_de_prioridade.push({velocidade.at(id_adjacente),id_adjacente});
+            // se a velocidade para chegar no nó adjacente passando pelo nó atual for menor que a velocidade no nó adjacente
+            if(velocidade.at(no_adjacente) > velocidade.at(no_atual) + peso){ 
+                velocidade.at(no_adjacente) = velocidade.at(no_atual) + peso; // atualiza a velocidade do nó adjacente
+                antecessores.at(no_adjacente) = no_atual; // atualiza o antecessor como nó atual
+                pilha_de_prioridade.push({velocidade.at(no_adjacente),no_adjacente}); // insere o nó adjacente na pilha
             }
         }
     }
 
+    // se os nós de origem e destino não estão conectados, retorna -1
     if (velocidade.at(idDestino) >= INT_MAX){
         return -1;
     }
-
+    
+    // retorna a velocidade minima entre os nós
     return velocidade.at(idDestino);
 }
 
-int Grafo::fluxo_maximo(int idOrigem, int idDestino){
-    // cria um map com a velocidade, os antecessores e uma flag se a aresta foi visitada (booleano)
-    std::map<int,int> velocidade;
-    std::map<int,int> antecessores;
-    std::map<int,bool> visitados;
+// implementação do Algoritmo de Edmonds-Karp para encontrar o fluxo máximo entre dois nós
+int Grafo::fluxo_maximo(int idOrigem, int idDestino){ 
+    std::map<int,std::map<int,int>> fluxo; // relaciona o fluxo de cada nó com cada nó adjacente
+    // <[valor de fluxo][nó origem][aresta com nó adjacente]>
 
-    std::priority_queue<std::pair<int,int>,std::vector<std::pair<int,int>>,std::greater<std::pair<int,int>>> fila_de_prioridade;
+    std::map<int,std::map<int,int>> capacidade; // relaciona a capacidade (poder de transmissão) de cada nó com cada nó adjacente
+    // <[velocidade][nó origem][aresta com nó adjacente]>
 
-    int menor_velocidade = INT_MAX;
+    std::map<int,int> antecessores; // relaciona o antecessor ao nó
+    std::queue<int> fila; // fila para armazenar os nós
+
     for (const auto& vertice: lista_de_nos){
-        velocidade.insert({vertice.first, 0}); // seta velocidades como 0
-        antecessores.insert({vertice.first,-1});
-        visitados.insert({vertice.first,false});
+        for (const auto& aresta: lista_de_nos.at(vertice.first).pegar_lista_de_arestas()){
+            capacidade[vertice.first][aresta.first] = aresta.second; // inicializa a capacidade como a velocidade entre os nós
+            fluxo[vertice.first][aresta.first] = 0; // inicializa o fluxo como 0 para todos os nós
+        }
     }
 
-    velocidade.at(idOrigem) = 0;
-    fila_de_prioridade.push({0,idOrigem});
+    int fluxo_maximo = 0;
 
-    while(!fila_de_prioridade.empty()){
-        int id_atual = fila_de_prioridade.top().second;
-        fila_de_prioridade.pop();
-
-        if(visitados.at(id_atual) == true){
-            continue;
+    while(true){
+        for (const auto& vertice: lista_de_nos){ // inicializa todos os antecessores do nó como -1
+            antecessores[vertice.first] = -1;
         }
 
-        visitados.at(id_atual) = true;
+        fila.push(idOrigem); // insere o nó de origem na fila
 
-        for (const auto& aresta: lista_de_nos.at(id_atual).pegar_lista_de_arestas()){
-            int id_adjacente = aresta.first;
-            int peso = aresta.second;
+        while(!fila.empty()){ 
+            int no_atual = fila.front(); // pega o primeiro nó da fila
+            fila.pop(); // remove o nó da fila
 
-            if(velocidade.at(id_adjacente) < velocidade.at(id_atual) + peso){
-                velocidade.at(id_adjacente) = velocidade.at(id_atual) + peso;
-                antecessores.at(id_adjacente) = id_atual;
-                fila_de_prioridade.push({velocidade.at(id_adjacente),id_adjacente});
-                if (menor_velocidade > peso){
-                    menor_velocidade = peso;
+            for (const auto& aresta: lista_de_nos.at(no_atual).pegar_lista_de_arestas()){ // percorre as arestas do nó atual
+                int no_adjacente = aresta.first; // pega o nó adjacente
+
+                // verifica se o nó adjacente não foi visitado
+                // caso não, verifica se capacidade do nó atual para o nó adjacente é maior que o fluxo do nó atual para o nó adjacente
+                if(antecessores[no_adjacente] == -1 && capacidade[no_atual][no_adjacente] > fluxo[no_atual][no_adjacente]){
+                    antecessores[no_adjacente] = no_atual; // o antecessor do nó adjacente se torna o nó atual
+                    fila.push(no_adjacente); // insere o nó adjacente na fila
                 }
             }
         }
+
+        // se o antecessor do nó de destino for -1, significa que não há caminho entre os nós
+        if(antecessores[idDestino] == -1){
+            break;
+        }
+
+        int fluxo_minimo = INT_MAX;
+
+        // percorre o nó de destino até a origem e pega o fluxo mínimo
+        for (int no_atual = idDestino; no_atual != idOrigem; no_atual = antecessores[no_atual]){
+            int no_anterior = antecessores[no_atual];
+
+            // fluxo mínimo é o menor valor entre o fluxo mínimo já encontrado antes e diferença entre a capacidade e o fluxo
+            fluxo_minimo = std::min(fluxo_minimo, capacidade[no_anterior][no_atual] - fluxo[no_anterior][no_atual]);
+        }
+
+        // percorre novamente o nó de destino até a origem e atualiza o fluxo
+        for (int no_atual = idDestino; no_atual != idOrigem; no_atual = antecessores[no_atual]){
+            int no_anterior = antecessores[no_atual];
+
+            // soma o fluxo mínimo ao fluxo do nó anterior para o nó atual
+            fluxo[no_anterior][no_atual] += fluxo_minimo;
+            // subtrai o fluxo mínimo do fluxo do nó atual para o nó anterior
+            fluxo[no_atual][no_anterior] -= fluxo_minimo;
+        }
+
+        fluxo_maximo += fluxo_minimo;
     }
 
-    if (velocidade.at(idDestino) == 0){
-        return -1;
-    }
-
-    // o menor valor da soma de velocidades é o maior caminho
-    return (menor_velocidade);
+    return fluxo_maximo;
 }
 
 std::ostream& operator<<(std::ostream& os,const Grafo& grafo){
@@ -232,4 +265,3 @@ int Grafo:: cor_profundidade() const{
     
     return ciclos;
 }
-

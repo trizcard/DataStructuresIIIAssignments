@@ -1,6 +1,6 @@
 CC          := g++
-DEBUG_FLAGS := -g3 -pedantic -Werror=implicit-function-declaration -fsanitize=address,undefined
-FLAGS       := -lm -Wall -Werror #$(DEBUG_FLAGS)
+DEBUG_FLAGS := -g3 
+FLAGS       := -lm -Wall -Werror $(DEBUG_FLAGS)
 
 SRC         := ./src
 BIN         := ./bin
@@ -9,7 +9,7 @@ EXEC        := prog
 ZIP         := exercicio.zip
 
 # List of all expected $(BIN)/*.o
-ALL         := $(wildcard $(SRC)/*.c $(SRC)/*.cpp)
+ALL         := $(wildcard $(SRC)/*.cpp)
 
 all: $(EXEC)
 
