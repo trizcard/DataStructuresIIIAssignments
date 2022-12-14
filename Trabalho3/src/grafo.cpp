@@ -1,4 +1,5 @@
 #include "../headers/grafo.h"
+#include <climits>
 
 //grafos
 
@@ -26,25 +27,14 @@ void Grafo::adicionar_no(const No& no){
     }
 }
 
-int Grafo::menor_caminho(int idOrigem, int idDestino){/*
-    int distancia[lista_de_nos.size()];
-    int antecessores[lista_de_nos.size()];
-    bool visitados[lista_de_nos.size()];
-    std::priority_queue< pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>> > fila_de_prioridade;
-    // inica o vetor de distancias e visitados 
-    for (const auto& vertice: lista_de_nos){
-        distancia[vertice.first] = 10000000;
-        antecessores[vertice.first] = -1;
-        visitados[vertice.first] = false;
-    }
-    */
+int Grafo::menor_caminho(int idOrigem, int idDestino){
     std::map<int,int> velocidade;
     std::map<int,int> antecessores;
     std::map<int,bool> visitados;
     std::priority_queue<std::pair<int,int>,std::vector<std::pair<int,int>>,std::greater<std::pair<int,int>>> fila_de_prioridade;
 
     for (const auto& vertice: lista_de_nos){
-        velocidade.insert({vertice.first,10000000});
+        velocidade.insert({vertice.first, INT_MAX});
         antecessores.insert({vertice.first,-1});
         visitados.insert({vertice.first,false});
     }
@@ -74,7 +64,62 @@ int Grafo::menor_caminho(int idOrigem, int idDestino){/*
         }
     }
 
+    if (velocidade.at(idDestino) >= INT_MAX){
+        return -1;
+    }
+
     return velocidade.at(idDestino);
+}
+
+int Grafo::fluxo_maximo(int idOrigem, int idDestino){
+    // cria um map com a velocidade, os antecessores e uma flag se a aresta foi visitada (booleano)
+    std::map<int,int> velocidade;
+    std::map<int,int> antecessores;
+    std::map<int,bool> visitados;
+
+    std::priority_queue<std::pair<int,int>,std::vector<std::pair<int,int>>,std::greater<std::pair<int,int>>> fila_de_prioridade;
+
+    int menor_velocidade = INT_MAX;
+    for (const auto& vertice: lista_de_nos){
+        velocidade.insert({vertice.first, 0}); // seta velocidades como 0
+        antecessores.insert({vertice.first,-1});
+        visitados.insert({vertice.first,false});
+    }
+
+    velocidade.at(idOrigem) = 0;
+    fila_de_prioridade.push({0,idOrigem});
+
+    while(!fila_de_prioridade.empty()){
+        int id_atual = fila_de_prioridade.top().second;
+        fila_de_prioridade.pop();
+
+        if(visitados.at(id_atual) == true){
+            continue;
+        }
+
+        visitados.at(id_atual) = true;
+
+        for (const auto& aresta: lista_de_nos.at(id_atual).pegar_lista_de_arestas()){
+            int id_adjacente = aresta.first;
+            int peso = aresta.second;
+
+            if(velocidade.at(id_adjacente) < velocidade.at(id_atual) + peso){
+                velocidade.at(id_adjacente) = velocidade.at(id_atual) + peso;
+                antecessores.at(id_adjacente) = id_atual;
+                fila_de_prioridade.push({velocidade.at(id_adjacente),id_adjacente});
+                if (menor_velocidade > peso){
+                    menor_velocidade = peso;
+                }
+            }
+        }
+    }
+
+    if (velocidade.at(idDestino) == 0){
+        return -1;
+    }
+
+    // o menor valor da soma de velocidades é o maior caminho
+    return (menor_velocidade);
 }
 
 std::ostream& operator<<(std::ostream& os,const Grafo& grafo){

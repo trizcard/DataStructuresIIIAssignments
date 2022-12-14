@@ -17,7 +17,7 @@ int main() {
     scanf("%d ", &func); // seleciona funcao
     scanf("%s", nomeArq); // nome do arquivo de entrada
     
-    //int n; 
+    int n; 
 
     // chama a funcao a ser executada
     switch (func) {
@@ -29,14 +29,12 @@ int main() {
             comando12(nomeArq);
             break;
         
-        /*  case 13:
+        case 13:
             scanf("%d", &n);
             comando13(nomeArq, n);
             break;
-        */
        
         case 14:
-            int n;
             scanf("%d", &n);
             comando14(nomeArq, n);
             break;

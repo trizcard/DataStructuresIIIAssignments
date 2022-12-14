@@ -58,15 +58,7 @@ void comando12(char* nome_do_arquivo_entrada) {
 
 }
 
-/*
 void comando13(char* nome_do_arquivo_entrada, int n) {
-   
-}
-*/
-
-
-
-void comando14(char* nome_do_arquivo_entrada, int n) {
     FILE* arquivo_entrada = abrir_leitura_binario(nome_do_arquivo_entrada);
     if(arquivo_entrada == NULL) return;
 
@@ -82,20 +74,57 @@ void comando14(char* nome_do_arquivo_entrada, int n) {
 
     
     Grafo grafo {arquivo_entrada};
-    int orig, fim, parada, cMin;
+    int orig, fim, cMax;
+    
+    for (int i = 0; i < n; i++){
+        scanf("%d %d", &orig, &fim);
+        cMax = 0;
+        // implementar Algoritmo de Dijkstra reverso para encontrar o caminho maximo
+        cMax += grafo.fluxo_maximo(orig, fim);
+        if(cMax <= 0){
+          printf("Fluxo máximo entre %d e %d: -1\n", orig, fim);
+        }
+        else{
+          printf("Fluxo máximo entre %d e %d: %d Mbps\n", orig, fim, cMax);
+        }
+    }
+    
+    free(novo_reg_cabecalho);
+    fclose(arquivo_entrada);
+}
+
+void comando14(char* nome_do_arquivo_entrada, int n) {
+   FILE* arquivo_entrada = abrir_leitura_binario(nome_do_arquivo_entrada);
+    if(arquivo_entrada == NULL) return;
+
+    reg_cabecalho *novo_reg_cabecalho = cria_registro_cabecalho();
+
+    ler_reg_cabecalho(arquivo_entrada, novo_reg_cabecalho);
+
+    if (checa_consistencia(novo_reg_cabecalho) != 0){
+      free(novo_reg_cabecalho);
+      fclose(arquivo_entrada);
+      return;
+    }
+
+    
+    Grafo grafo {arquivo_entrada};
+    int orig, fim, parada, c1, c2;
     
     for (int i = 0; i < n; i++){
         scanf("%d %d %d", &orig, &fim, &parada);
-        cMin = 0;
+        
         // implementar Algoritmo de Dijkstra para encontrar o caminho minimo
-        cMin += grafo.menor_caminho(orig, parada);
-        cMin += grafo.menor_caminho(parada, fim);
-        if(cMin > 10000000){
+        c1 = grafo.menor_caminho(orig, parada);
+        c2 = grafo.menor_caminho(parada, fim);
+        if(c1 == -1 || c2 == -1){
           printf("Comprimento do caminho entre %d e %d parando em %d: -1\n", orig, fim, parada);
         }
         else{
-          printf("Comprimento do caminho entre %d e %d parando em %d: %dMbps\n", orig, fim, parada, cMin);
+          printf("Comprimento do caminho entre %d e %d parando em %d: %dMbps\n", orig, fim, parada, (c1+c2));
         }
     }
-    //lembrar de fechar arq e liberar o reg cabecalho
+    
+    free(novo_reg_cabecalho);
+    fclose(arquivo_entrada);
 }
