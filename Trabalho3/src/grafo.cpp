@@ -214,54 +214,47 @@ int calcula_velocidade(reg_dados* registro){
 
 }
 
-//Função pega a quantidade de vértices
-int Grafo ::qtd_vertices() const {
-    return lista_de_nos.size();
-}
 
-void Grafo::busca_profundidade( int idOrigem, std::map <int,int> cor, int *ciclos, int noOriginal) const {
+void Grafo::busca_profundidade( int idOrigem, std::map <int,int>& cor, int *ciclos, int noOriginal) const {
     //Marca o vértice que está como amarelo, que significa que ele foi visitado com map
     cor[idOrigem] = AMARELO;
+    
 
     //Percorre todos os vértices adjacentes
     for(const auto& aresta: lista_de_nos.at(idOrigem).pegar_lista_de_arestas()){
         int id_adjacente = aresta.first;
-
+        
         //Se o vértice adjacente não foi visitado, chama a função recursivamente
-        if(cor[id_adjacente] == BRANCO){
+        if(cor.at(id_adjacente) == BRANCO){
             busca_profundidade(id_adjacente, cor, ciclos, noOriginal);
+        }else if(cor.at(id_adjacente) == VERMELHO){
+            *ciclos = *ciclos + 1;
         }
     }
 
-    //Verificar se é ciclo simples, ou seja, se o vértice adjacente é o vértice original
-    if(cor[idOrigem] != BRANCO && idOrigem == noOriginal){
-        *ciclos = *ciclos + 1;
-    }
-
+    
     //Marca o vértice como vermelho, que significa que ele foi visitado e todos os seus adjacentes também
     cor[idOrigem] = VERMELHO;
 }
 
 //Função demarca cor da profundidade (O índice do vértice do arranjo adjacente em grafo será o mesmo do arranjo de cor)
 int Grafo:: cor_profundidade() const{
-    //int qtd_vertice = qtd_vertices();
     std::map <int,int> cor;
-    //int cor[qtd_vertice];
     int ciclos = 0;
+    int arv = 0;
 
     //Marca todos os vértices como branco, que significa que eles não foram visitados no map de cor e colocar a posi dos vértices
     for(const auto& vertice: lista_de_nos){
         cor.insert({vertice.first, BRANCO});
     }   
-    //imprimir chegou aqui
+    
     //Chama a função recursiva para todos os vértices com map
     for(const auto& vertice: cor){
         if(vertice.second == BRANCO){
             busca_profundidade(vertice.first, cor, &ciclos, vertice.first);
+            arv +=1;
         }
-    std::cout<<"chegou aqui"<<std::endl;
-
-    }
+    } 
     
     return ciclos;
 }

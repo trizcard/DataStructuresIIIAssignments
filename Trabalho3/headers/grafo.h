@@ -28,8 +28,7 @@ class Grafo{
         friend std::ostream& operator<<(std::ostream& os,const Grafo& grafo); 
         int menor_caminho(int idOrigem, int idDestino);
         int fluxo_maximo(int idOrigem, int idDestino);
-        int qtd_vertices() const;
-        void busca_profundidade( int idOrigem,  std::map <int,int> cor, int *ciclos, int noOriginal ) const;
+        void busca_profundidade( int idOrigem,  std::map <int,int>& cor, int *ciclos, int noOriginal ) const;
         int cor_profundidade() const;
 
 };
