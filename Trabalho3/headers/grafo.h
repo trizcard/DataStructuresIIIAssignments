@@ -6,18 +6,21 @@
 #include "../headers/estrutura.h"
 #include "../headers/funcLeituraEscrita.h"
 #include "../headers/funcChecagem.h"
-#define BRANCO 0
-#define AMARELO 1
-#define VERMELHO 2
+#define BRANCO 0 //não visitado
+#define AMARELO 1 //visitado
+#define VERMELHO 2 //visitado e todas arestas visitadas
 
 class No;
+
+//função auxiliar para o grafo
+int calcula_velocidade(reg_dados* registro);
 
 class Grafo{
     //atributos
     private:
         std::map<int,No> lista_de_nos; //ordena as chaves idConecta(de tipo int) e guarda Nos(que correspondem aos vértices).
     
-    //métodos
+    //métodos privados
         void adicionar_no(const No& no);
     
     //construtor
@@ -48,22 +51,18 @@ class No{
         No(int idConecta);
 
     //métodos
-        int pegar_idConecta() const;/*
-        std::string pegar_nomePops() const;
-        std::string pegar_nomePais() const;
-        std::string pegar_siglaPais()const;*/
+        int pegar_idConecta() const;
         const std::map<int,int>& pegar_lista_de_arestas() const;
         void adicionar_aresta(int idPoPsConectado, int velocidade);
         void completar_no(const No& no_completo);
 
-    //atributo
+    //atributo público
         bool completo;
     
-    //funcao
+    //funcao 
         friend std::ostream& operator<<(std::ostream& os,const No& no);
 
 
 
 };
 
-int calcula_velocidade(reg_dados* registro);

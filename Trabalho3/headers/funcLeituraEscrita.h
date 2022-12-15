@@ -8,6 +8,7 @@ void le_registro(reg_dados*, FILE*);
 void le_campos_tam_fixo(reg_dados*, FILE*);
 void le_campos_tam_variavel(reg_dados*, FILE*);
 
+//leitura do arquivo
 int le_arquivo(reg_dados*, FILE*);
 void ler_reg_cabecalho(FILE*, reg_cabecalho*);
 

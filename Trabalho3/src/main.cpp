@@ -7,7 +7,7 @@
 // Beatriz Lomes da Silva NUSP: 12548038
 // Participação: 
 // Beatriz Aimee Teixeira Furtado Braga NUSP: 12547934
-// Participação:
+// Participação: 100%
 
 int main() {
     

@@ -1,13 +1,15 @@
 #include "../headers/funcChecagem.h"
 
-/*
 
-Checa a consistência de um arquivo, isto é, se a posição [0] do 
-campo "status" do registro de cabeçalho é diferente de '1', 
-isto é, o arquivo está inconsistente, é printado uma mensagem 
-de erro e retornado 1. Caso contrário é retornado 0.
+/**
+ * @brief Função responsável por checar a consistência de um arquivo e 
+ * retornar uma mensagem de erro caso o arquivo esteja inconsistente
+ *
+ * @param reg Ponteiro para o registro de cabeçalho
+ * @return int Retorna 1 caso o arquivo esteja inconsistente, 0 caso contrári
+ */
 
-*/
+
 int checa_consistencia(reg_cabecalho* reg){
     if(reg->status[0] != '1'){//se for diferente de 1, ou seja, inconsistente
         printf("Falha na execução da funcionalidade.\n");

@@ -1,11 +1,11 @@
 #include "../headers/estrutura.h"
 
-/*
+/**
+ * @brief Função responsável por alocar espaço para o registro de dados e inicializar seus valores
+ * 
+ * @return reg_dados* Ponteiro para o registro de dados alocado
+ */
 
-Função responsável por criar um ponteiro de registro de dados, primeiramente alocando espaço, verificando se a alocação
-foi de sucesso, e inicializando os valores conforme especificado.
-
-*/
 reg_dados* cria_registro_dados(){
 
     reg_dados* novo_reg;
@@ -21,12 +21,12 @@ reg_dados* cria_registro_dados(){
     return novo_reg;
 }
 
-/*
+/**
+ * @brief Função responsável por alocar espaço para o registro de cabeçalho e inicializar seus valores
+ * 
+ * @return reg_cabecalho* Ponteiro para o registro de cabeçalho alocado
+ */
 
-Função responsável por criar um ponteiro de registro de cabeçalho, primeiramente alocando espaço, verificando se a alocação
-foi de sucesso, e inicializando os valores conforme especificado.
-
-*/
 reg_cabecalho* cria_registro_cabecalho(){
 
     reg_cabecalho* novo_reg;

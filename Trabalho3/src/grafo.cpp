@@ -1,33 +1,59 @@
 #include "../headers/grafo.h"
 #include <climits>
 
-//grafos
+///////////////////////////////// Funções da classe Grafo 
+
+/**
+ * @brief Construtor da classe Grafo
+ * 
+ * @param arquivo_entrada Ponteiro para o arquivo de entrada
+ */
 
 Grafo::Grafo(FILE* arquivo_entrada){
 
     reg_dados *novo_reg_dados= cria_registro_dados();
 
     while (le_arquivo(novo_reg_dados, arquivo_entrada)!=0){ //enquanto o arquivo não terminar, continuar lendo os registros
+
         adicionar_no({novo_reg_dados}); //cria No que recebe o registro de dados (idConecta-nomePoPs-nomePais-siglaPais)
         
         if(novo_reg_dados->idPoPsConectado!=-1){ // se existir conexao
+            
             adicionar_no(novo_reg_dados->idPoPsConectado); //cria No que recebe o idPopsConectado de cada idConecta
-            lista_de_nos.at(novo_reg_dados->idConecta).adicionar_aresta(novo_reg_dados->idPoPsConectado, calcula_velocidade(novo_reg_dados));//encontra o idConecta na lista de no e cria a ligação das arestas, com os pesos calculados
-            lista_de_nos.at(novo_reg_dados->idPoPsConectado).adicionar_aresta(novo_reg_dados->idConecta, calcula_velocidade(novo_reg_dados));//encontra o idConecta na lista de no e cria a ligação das arestas, com os pesos calculados        
+            
+            //encontra o idConecta na lista de no e cria a ligação das arestas, com os pesos calculados
+            lista_de_nos.at(novo_reg_dados->idConecta).adicionar_aresta(novo_reg_dados->idPoPsConectado, calcula_velocidade(novo_reg_dados));
+            //encontra o idPopsConectado (idConecta do ponto conectado) na lista de no e cria a ligação das arestas, com os pesos calculados        
+            lista_de_nos.at(novo_reg_dados->idPoPsConectado).adicionar_aresta(novo_reg_dados->idConecta, calcula_velocidade(novo_reg_dados));
         }
     }
 
+    //libera o registro de dados
     free(novo_reg_dados);
 }
 
+/**
+ * @brief Função responsável por adicionar um novo no na lista de nos
+ * 
+ * @param no No a ser adicionado
+ */
+
 void Grafo::adicionar_no(const No& no){
     lista_de_nos.insert({no.pegar_idConecta(),no}); //insere no na lista de nos
+
     if(no.completo == true){ //se o no a ser inserido esta completo, ou seja, é um idConecta e nao um idPopsConectado
         lista_de_nos.at(no.pegar_idConecta()).completar_no(no); //completa as informações do no, se for um idPopsConectado inserido, que nao possuia infos, sera completado
     }
 }
 
-// implementação do Algoritmo de Dijkstra para encontrar o menor caminho entre dois nós
+/**
+ * @brief Função responsável por encontrar o menor caminho entre dois nós, com base no algoritmo de Dijkstra
+ * 
+ * @param idOrigem Id do nó de origem
+ * @param idDestino Id do nó de destino
+ * @return int Retorna a velocidade do menor caminho, ou -1 caso não exista caminho
+ */
+
 int Grafo::menor_caminho(int idOrigem, int idDestino){
     std::map<int,int> velocidade; // relaciona a velocidade ate o no
     std::map<int,int> antecessores; // relaciona o antecessor ao no
@@ -57,11 +83,11 @@ int Grafo::menor_caminho(int idOrigem, int idDestino){
             continue;
         }
 
-        visitados.at(no_atual) = true;
+        visitados.at(no_atual) = true; // marca o no como visitado
 
         for (const auto& aresta: lista_de_nos.at(no_atual).pegar_lista_de_arestas()){ // para cada aresta do no atual
-            int no_adjacente = aresta.first; 
-            int peso = aresta.second;
+            int no_adjacente = aresta.first; // pega o nó adjacente
+            int peso = aresta.second; // pega o peso da aresta
 
             // se a velocidade para chegar no nó adjacente passando pelo nó atual for menor que a velocidade no nó adjacente
             if(velocidade.at(no_adjacente) > velocidade.at(no_atual) + peso){ 
@@ -81,34 +107,39 @@ int Grafo::menor_caminho(int idOrigem, int idDestino){
     return velocidade.at(idDestino);
 }
 
-// implementação do Algoritmo de Edmonds-Karp para encontrar o fluxo máximo entre dois nós
+/**
+ * @brief Função responsável por encontrar o fluxo máximo entre dois nós, com base no algoritmo de Edmonds-Karp
+ * 
+ * @param idOrigem Id do nó de origem
+ * @param idDestino Id do nó de destino
+ * @return int Retorna o fluxo máximo entre os nós
+ */
+
 int Grafo::fluxo_maximo(int idOrigem, int idDestino){ 
     std::map<int,std::map<int,int>> fluxo; // relaciona o fluxo de cada nó com cada nó adjacente
-    // <[valor de fluxo][nó origem][aresta com nó adjacente]>
 
     std::map<int,std::map<int,int>> capacidade; // relaciona a capacidade (poder de transmissão) de cada nó com cada nó adjacente
-    // <[velocidade][nó origem][aresta com nó adjacente]>
-
+    
     std::map<int,int> antecessores; // relaciona o antecessor ao nó
     std::queue<int> fila; // fila para armazenar os nós
 
-    for (const auto& vertice: lista_de_nos){
-        for (const auto& aresta: lista_de_nos.at(vertice.first).pegar_lista_de_arestas()){
+    for (const auto& vertice: lista_de_nos){ // para cada nó
+        for (const auto& aresta: lista_de_nos.at(vertice.first).pegar_lista_de_arestas()){ // para cada aresta do nó
             capacidade[vertice.first][aresta.first] = aresta.second; // inicializa a capacidade como a velocidade entre os nós
             fluxo[vertice.first][aresta.first] = 0; // inicializa o fluxo como 0 para todos os nós
         }
     }
 
-    int fluxo_maximo = 0;
+    int fluxo_maximo = 0; // inicializa o fluxo máximo como 0
 
-    while(true){
+    while(true){ // enquanto houver caminho aumentante
         for (const auto& vertice: lista_de_nos){ // inicializa todos os antecessores do nó como -1
             antecessores[vertice.first] = -1;
         }
 
         fila.push(idOrigem); // insere o nó de origem na fila
 
-        while(!fila.empty()){ 
+        while(!fila.empty()){  // enquanto a fila não estiver vazia
             int no_atual = fila.front(); // pega o primeiro nó da fila
             fila.pop(); // remove o nó da fila
 
@@ -129,11 +160,11 @@ int Grafo::fluxo_maximo(int idOrigem, int idDestino){
             break;
         }
 
-        int fluxo_minimo = INT_MAX;
+        int fluxo_minimo = INT_MAX; 
 
         // percorre o nó de destino até a origem e pega o fluxo mínimo
         for (int no_atual = idDestino; no_atual != idOrigem; no_atual = antecessores[no_atual]){
-            int no_anterior = antecessores[no_atual];
+            int no_anterior = antecessores[no_atual]; // pega o nó anterior
 
             // fluxo mínimo é o menor valor entre o fluxo mínimo já encontrado antes e diferença entre a capacidade e o fluxo
             fluxo_minimo = std::min(fluxo_minimo, capacidade[no_anterior][no_atual] - fluxo[no_anterior][no_atual]);
@@ -149,22 +180,92 @@ int Grafo::fluxo_maximo(int idOrigem, int idDestino){
             fluxo[no_atual][no_anterior] -= fluxo_minimo;
         }
 
-        fluxo_maximo += fluxo_minimo;
+        fluxo_maximo += fluxo_minimo; // atualiza o fluxo máximo
     }
 
     return fluxo_maximo;
 }
 
+/**
+ * @brief Função responsável por fazer a busca em profundidade no grafo
+ * 
+ * @param idOrigem Id do nó de origem
+ * @param cor Mapa de cores dos nós
+ * @param ciclos Vetor de ciclos
+ * @param noOriginal Id do nó original
+ */
+
+void Grafo::busca_profundidade( int idOrigem, std::map <int,int>& cor, int *ciclos, int noOriginal) const {
+
+    //Marca o vértice que está como amarelo, que significa que ele foi visitado com map
+    cor[idOrigem] = AMARELO;
+    
+
+    //Percorre todos os vértices adjacentes
+    for(const auto& aresta: lista_de_nos.at(idOrigem).pegar_lista_de_arestas()){ 
+        int id_adjacente = aresta.first; //Pega o id do vértice adjacente
+        
+        //Se o vértice adjacente não foi visitado, chama a função recursivamente
+        if(cor.at(id_adjacente) == BRANCO){ 
+            busca_profundidade(id_adjacente, cor, ciclos, noOriginal);
+        }else if(cor.at(id_adjacente) == VERMELHO){ //Se o vértice adjacente já foi visitado, significa que existe um ciclo
+            *ciclos = *ciclos + 1;
+        }
+    }
+
+    //Marca o vértice como vermelho, que significa que ele foi visitado e todos os seus adjacentes também
+    cor[idOrigem] = VERMELHO;
+}
+
+/**
+ * @brief Função responsável por demarcar a cor da profundidade
+ * 
+ * @return int Retorna o número de ciclos
+ */
+
+int Grafo:: cor_profundidade() const{
+    std::map <int,int> cor; //Mapa de cores dos vértices
+    int ciclos = 0; //Número de ciclos
+    int arv = 0; //Número de árvores
+
+    //Marca todos os vértices como branco, que significa que eles não foram visitados no map de cor e colocar a posi dos vértices
+    for(const auto& vertice: lista_de_nos){
+        cor.insert({vertice.first, BRANCO});
+    }   
+    
+    for(const auto& vertice: cor){ //Percorre todos os vértices
+        if(vertice.second == BRANCO){ //Se o vértice não foi visitado, chama a função recursivamente
+            busca_profundidade(vertice.first, cor, &ciclos, vertice.first); 
+            arv +=1; //Incrementa o número de árvores
+        }
+    } 
+    
+    return ciclos;
+}
+
+/**
+ * @brief Função responsável por percorrer o grafo e imprimir os nós
+ * 
+ * @param os Objeto do tipo ostream
+ * @param grafo Objeto do tipo Grafo
+ * @return std::ostream& Retorna o objeto do tipo ostream
+ */
+
 std::ostream& operator<<(std::ostream& os,const Grafo& grafo){
-    for (const auto& vertice: grafo.lista_de_nos){
-        os<<vertice.second;
+    for (const auto& vertice: grafo.lista_de_nos){ // para cada nó
+        os<<vertice.second; // imprime o nó
     }
     return os;
     
 }
 
+///////////////////////////Funções da classe No]
 
-/////////// começa no
+/**
+ * @brief Construtor da classe No, para um No completo (idConecta inserido)
+ * 
+ * @param registro Ponteiro para o registro de dados
+ */
 
 No::No(reg_dados* registro){
     idConecta = registro->idConecta;
@@ -174,19 +275,45 @@ No::No(reg_dados* registro){
     completo = true;
 
 }
+
+/**
+ * @brief Construtor da classe No, para um No incompleto (idPoPsConectado inserido)
+ * 
+ * @param idConecta Id do nó, idPoPsConectado do no completo
+ */
+
 No::No(int idConecta){
     this->idConecta = idConecta;
     completo = false;
 }
 
+/**
+ * @brief Função responsável por retornar o idConecta do nó
+ * 
+ * @return int Retorna o idConecta do nó
+ */
 int No::pegar_idConecta() const {return idConecta;}
-//std::string No::pegar_nomePops() const{return nomePoPs;}
-//std::string No::pegar_nomePais() const{return nomePais;}
-//std::string No::pegar_siglaPais() const{return siglaPais;}
+
+/**
+ * @brief Função responsável por retornar o mapa de arestas do nó
+ * 
+ * @return const std::map<int,int>& Retorna o mapa de arestas do nó
+ */
 const std::map<int,int>& No::pegar_lista_de_arestas() const{return lista_de_arestas;}
 
+/**
+ * @brief Função responsável por adicionar uma aresta ao nó
+ * 
+ * @param idPoPsConectado Id do nó conectado
+ * @param velocidade Velocidade da aresta
+ */
 void No::adicionar_aresta(int idPoPsConectado, int velocidade){lista_de_arestas.insert({idPoPsConectado,velocidade});}
 
+/**
+ * @brief Função responsável por completar o nó
+ * 
+ * @param no_completo Nó completo
+ */
 void No::completar_no(const No& no_completo){
     if(completo==false){
         nomePoPs = no_completo.nomePoPs;
@@ -196,18 +323,35 @@ void No::completar_no(const No& no_completo){
     }
 }
 
+/**
+ * @brief Função responsável por imprimir as arestas do nó
+ * 
+ * @param os Objeto do tipo ostream
+ * @param no Objeto do tipo No
+ * @return std::ostream& Retorna o objeto do tipo ostream
+ */
+
 std::ostream& operator<<(std::ostream& os,const No& no){
 
-    for(const auto& aresta: no.lista_de_arestas){
+    for(const auto& aresta: no.lista_de_arestas){ // para cada aresta de um no, imprime a aresta
         os<<no.idConecta<<" "<<no.nomePoPs<<" "<<no.nomePais<<" "<<no.siglaPais<<" "<<aresta.first<<" "<<aresta.second<<"Mbps"<<std::endl;
     }
     return os;
 }
 
+///////////////////////////Função auxiliar
+
+
+/**
+ * @brief Função responsável por calcular a velocidade da aresta
+ * 
+ * @param registro Ponteiro para o registro de dados
+ * @return int Retorna a velocidade da aresta
+ */
 
 int calcula_velocidade(reg_dados* registro){
 
-    if (registro->unidadeMedida[0] == 'G'){
+    if (registro->unidadeMedida[0] == 'G'){ //Se a unidade de medida for Giga, multiplica por 1024 para converter para Mega
         return registro->velocidade*1024;
     }
     else return registro->velocidade;
@@ -215,46 +359,3 @@ int calcula_velocidade(reg_dados* registro){
 }
 
 
-void Grafo::busca_profundidade( int idOrigem, std::map <int,int>& cor, int *ciclos, int noOriginal) const {
-    //Marca o vértice que está como amarelo, que significa que ele foi visitado com map
-    cor[idOrigem] = AMARELO;
-    
-
-    //Percorre todos os vértices adjacentes
-    for(const auto& aresta: lista_de_nos.at(idOrigem).pegar_lista_de_arestas()){
-        int id_adjacente = aresta.first;
-        
-        //Se o vértice adjacente não foi visitado, chama a função recursivamente
-        if(cor.at(id_adjacente) == BRANCO){
-            busca_profundidade(id_adjacente, cor, ciclos, noOriginal);
-        }else if(cor.at(id_adjacente) == VERMELHO){
-            *ciclos = *ciclos + 1;
-        }
-    }
-
-    
-    //Marca o vértice como vermelho, que significa que ele foi visitado e todos os seus adjacentes também
-    cor[idOrigem] = VERMELHO;
-}
-
-//Função demarca cor da profundidade (O índice do vértice do arranjo adjacente em grafo será o mesmo do arranjo de cor)
-int Grafo:: cor_profundidade() const{
-    std::map <int,int> cor;
-    int ciclos = 0;
-    int arv = 0;
-
-    //Marca todos os vértices como branco, que significa que eles não foram visitados no map de cor e colocar a posi dos vértices
-    for(const auto& vertice: lista_de_nos){
-        cor.insert({vertice.first, BRANCO});
-    }   
-    
-    //Chama a função recursiva para todos os vértices com map
-    for(const auto& vertice: cor){
-        if(vertice.second == BRANCO){
-            busca_profundidade(vertice.first, cor, &ciclos, vertice.first);
-            arv +=1;
-        }
-    } 
-    
-    return ciclos;
-}
