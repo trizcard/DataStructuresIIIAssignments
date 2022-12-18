@@ -3,9 +3,9 @@
 
 // Integrantes
 // Beatriz Cardoso de Oliveira NUSP: 12566400
-// Participação:
+// Participação: 100%
 // Beatriz Lomes da Silva NUSP: 12548038
-// Participação: 
+// Participação: 100%
 // Beatriz Aimee Teixeira Furtado Braga NUSP: 12547934
 // Participação: 100%
 
